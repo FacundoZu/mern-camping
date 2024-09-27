@@ -1,10 +1,10 @@
 import React from 'react'
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
-import { Home } from './components/Home'
-import { Login } from './components/Login'
-import { Register } from './components/Register'
-import { Perfil } from './components/Perfil'
-import Header from './layout/Header'
+import { Home } from './components/pages/Home'
+import { Login } from './components/pages/Login'
+import { Register } from './components/pages/Register'
+import { Perfil } from './components/pages/Perfil'
+import Header from './components/layout/Header'
  
 export default function App() {
   return (
