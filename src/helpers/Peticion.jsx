@@ -9,6 +9,7 @@ export const Peticion = async (url, metodo, datosGuardar = "", archivos = false,
     if (metodo == "GET" || metodo == "DELETE") {
         opciones = {
             method: metodo,
+            credentials,
         };
     }
 

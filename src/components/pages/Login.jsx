@@ -1,25 +1,30 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Peticion } from '../../helpers/Peticion';
 import { Global } from '../../helpers/Global';
 import { useForm } from '../../hooks/useForm';
+import { AuthContext } from '../../context/AuthContext';
+import useAuth from '../../hooks/useAuth';
 
 export const Login = () => {
   const navigate = useNavigate();
   const { formulario, cambiado } = useForm({});
   const [mensajeError, setMensajeError] = useState(null);
+  const { setAuth } = useAuth();
+
+  const googleLogin = () => {
+    window.open("http://localhost:3900/api/user/google", "_self");
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMensajeError(null); // Limpiar mensajes previos
+    setMensajeError(null); 
 
-    // Realizar la petición para iniciar sesión
-    console.log(formulario)
     const { datos } = await Peticion(Global.url + "user/login", "POST", formulario, false, 'include');
 
     if (datos.status === "success") {
-      // Redirigir al home
-      navigate('/');
+      setAuth(datos.user);
+      navigate('/home');
     } else {
       setMensajeError("Credenciales incorrectas. Por favor, inténtalo de nuevo.");
     }
@@ -52,24 +57,19 @@ export const Login = () => {
 
           {mensajeError && <div className="text-red-500 bg-red-600 bg-opacity-10 rounded-lg p-2 mt-3 font-bold text-sm">{mensajeError}</div>}
 
-          <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded mt-4 hover:bg-indigo-700">
+          <button type="submit" className="w-full bg-lime-600 text-white py-2 rounded mt-4 hover:bg-lime-700">
             Iniciar sesión
           </button>
         </form>
 
         <div className="text-center">
           <h2>¿No tienes una cuenta?</h2>
-          <Link to='/register' className="text-blue-500 underline">Crea una cuenta</Link>
+          <Link to='/register' className="text-lime-600 underline">Crea una cuenta</Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mt-4">
-          <button className="w-full border border-gray-300 py-2 rounded hover:bg-gray-100">
-            <ChromeIcon className="mr-2 h-4 w-4" />
-            Google
-          </button>
-          <button className="w-full border border-gray-300 py-2 rounded hover:bg-gray-100">
-            <FacebookIcon className="mr-2 h-4 w-4" />
-            Facebook
+        <div className="space-y-2">
+          <button onClick={googleLogin}>
+            Iniciar sesión con Google
           </button>
         </div>
 
@@ -80,24 +80,3 @@ export const Login = () => {
     </div>
   );
 };
-
-function ChromeIcon(props) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="4" />
-      <line x1="21.17" x2="12" y1="8" y2="8" />
-      <line x1="3.95" x2="8.54" y1="6.06" y2="14" />
-      <line x1="10.88" x2="15.46" y1="21.94" y2="14" />
-    </svg>
-  );
-}
-
-function FacebookIcon(props) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-    </svg>
-  );
-}
-

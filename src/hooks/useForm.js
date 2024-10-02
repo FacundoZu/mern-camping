@@ -23,7 +23,6 @@ export const useForm = (objetoInicial = {}) => {
 
     const cambiado = ({ target }) => {
         const { name, value } = target
-        console.log(name +"-"+ value)
         setFormulario({
             ...formulario,
             [name]: value

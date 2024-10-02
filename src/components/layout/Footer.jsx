@@ -1,7 +1,10 @@
 import React from 'react'
 
-export const Footer = () => {
+const Footer = () => {
   return (
-    <div>Footer</div>
+    <footer className="bg-slate-200 text-white py-4 text-center">
+      <p className='text-slate-600 hover:underline hidden sm:inline font-medium'>Camping Cachi &copy; 2024. Todos los derechos reservados.</p>
+    </footer>
   )
 }
+export default Footer;
