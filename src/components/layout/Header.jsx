@@ -21,10 +21,10 @@ export default function Header() {
   
   return (
     <header className='bg-slate-200 shadow-md'>
-      <div className='flex justify-between items-center max-w-6xl mx-auto p-3'>
+      <div className='flex justify-between items-center text-balance max-w-6xl mx-auto p-3'>
         <Link to="/">
           <h1 className='font-bold text-sm sm:text-xl flex items-center'>
-            <RiLeafFill className='text-lime-600 m-auto mt-1.5 mr-1' />
+            <RiLeafFill className='text-lime-600 justify-center mr-1' />
             <span className='text-slate-500'>Camping</span>
             <span className='text-slate-700'>Cachi</span>
           </h1>

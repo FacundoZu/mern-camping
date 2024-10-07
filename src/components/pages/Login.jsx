@@ -5,6 +5,7 @@ import { Global } from '../../helpers/Global';
 import { useForm } from '../../hooks/useForm';
 import { AuthContext } from '../../context/AuthContext';
 import useAuth from '../../hooks/useAuth';
+import { FcGoogle } from "react-icons/fc";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMensajeError(null); 
+    setMensajeError(null);
 
     const { datos } = await Peticion(Global.url + "user/login", "POST", formulario, false, 'include');
 
@@ -44,20 +45,20 @@ export const Login = () => {
           <div className="flex flex-col gap-3">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo electrónico</label>
             <input id="email" type="email" name="email" placeholder="ejemplo@dominio.com" onChange={cambiado} required
-              className="w-full p-2 border rounded"
+              className="form-input"
             />
           </div>
 
           <div className="flex flex-col gap-3">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>
             <input id="password" type="password" name="password" onChange={cambiado} required
-              className="w-full p-2 border rounded"
+              className="form-input"
             />
           </div>
 
-          {mensajeError && <div className="text-red-500 bg-red-600 bg-opacity-10 rounded-lg p-2 mt-3 font-bold text-sm">{mensajeError}</div>}
+          {mensajeError && <div className="error-msg">{mensajeError}</div>}
 
-          <button type="submit" className="w-full bg-lime-600 text-white py-2 rounded mt-4 hover:bg-lime-700">
+          <button type="submit" className="botton-submit mt-4">
             Iniciar sesión
           </button>
         </form>
@@ -68,14 +69,11 @@ export const Login = () => {
         </div>
 
         <div className="space-y-2">
-          <button onClick={googleLogin}>
+          <button onClick={googleLogin} className="flex w-full text-balance gap-2 items-center justify-center">
+            <FcGoogle />
             Iniciar sesión con Google
           </button>
         </div>
-
-        <a href="#" className="inline-block w-full text-center text-sm underline mt-2">
-          ¿Olvidaste tu contraseña?
-        </a>
       </div>
     </div>
   );
