@@ -7,7 +7,7 @@ export const Home = () => {
 
   return (
     <div>
-      rat
+      Home
     </div>
   )
 }
