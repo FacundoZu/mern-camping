@@ -6,6 +6,8 @@ import { Perfil } from '../components/pages/Perfil'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import PrivateRoute from './PrivateRoute'
 import Layout from '../components/layout/Layout'
+import { Cabañas } from '../components/pages/Cabañas'
+import { Cabaña } from '../components/pages/Cabaña'
 
 export const Routing = () => {
   return (
@@ -17,6 +19,8 @@ export const Routing = () => {
           <Route path='/home' element={<Home />} />
           <Route path='/login' element={<Login />} />
           <Route path='/Register' element={<Register />} />
+          <Route path='/cabañas' element={<Cabañas />} />
+          <Route path='/cabaña/:id' element={<Cabaña />} />
           <Route path='/Perfil' element={<PrivateRoute ><Perfil /></PrivateRoute>} />
         </Route>
       </Routes>

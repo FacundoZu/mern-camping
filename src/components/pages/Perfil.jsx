@@ -3,12 +3,13 @@ import { Peticion } from '../../helpers/Peticion';
 import { Global } from '../../helpers/Global';
 import useAuth from '../../hooks/useAuth';
 import { useForm } from '../../hooks/useForm';
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaUser } from "react-icons/fa";
 
 export const Perfil = () => {
 
   const { auth, setAuth } = useAuth()
   const [usuario, setUsuario] = useState(auth)
+
   const { formulario, cambiado } = useForm();
 
   const [mensajeError, setMensajeError] = useState(null);
@@ -49,14 +50,7 @@ export const Perfil = () => {
     const formData = new FormData();
     formData.append('image', selectedFile);
 
-    const response = await fetch("http://localhost:3900/api/user/subir-imagen", {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-      headers: {
-        "Content-Type": "application/json"
-      }
-    });
+    const respuesta = await Peticion(Global.url + 'user/uploadImage', 'POST', formData, true, 'include');
 
     const { datos } = await Peticion(Global.url + "user/editUser", "POST", formulario, false, 'include');
 
@@ -74,21 +68,26 @@ export const Perfil = () => {
     <div className=" mx-auto p-6 bg-white shadow-md rounded-lg mt-10 max-w-xl">
       <h2 className="text-xl font-bold text-center mb-4">Editar Perfil</h2>
       {mensajeError && <span>{mensajeError}</span>}
-      <img src={auth.image} alt="" />
+      {auth.image
+        ? (
+          <img src={auth.image} alt="Perfil" className="w-52 h-52 rounded-full border m-auto mb-1 border-gray-300 shadow-sm" />
+        ) : (
+          <FaUser className="w-52 h-52 rounded-full border m-auto mb-1 border-gray-300 shadow-sm text-gray-400" />
+        )}
       {edit ? (
         <form onSubmit={handleSubmit} className="space-y-4">
           {previewImage && (
             <div className="image-preview">
-              <img src={previewImage} alt="Vista previa" className="w-48 h-48 object-cover" />
+              <img src={previewImage} alt="Vista previa" className="w-52 h-52 rounded-full border m-auto mb-1 border-gray-300 shadow-sm" />
             </div>
           )}
           <input
             type="file"
             id="fileInput"
             name="image"
-            onChange={onFileChange} // Maneja la selección del archivo
+            onChange={onFileChange}
             className="mt-2 p-2 border border-gray-300 rounded-md shadow-sm"
-            accept="image/*" // Limita la selección a imágenes
+            accept="image/*"
           />
           <div>
             <input type="text" name="name" defaultValue={usuario.name} onChange={cambiado}
@@ -120,19 +119,22 @@ export const Perfil = () => {
               Guardar Cambios
             </button>
           )}
-
+          <button onClick={handleToggelEdit} className='flex items-center botton-submit justify-center'>Cancelar</button>
         </form>
       ) : (
         <div className="space-y-4 flex flex-col">
-          {
-          }
           <label className="w-full p-2 border border-gray-300 rounded-md">{usuario.name}</label>
           <label className="w-full p-2 border border-gray-300 rounded-md">{usuario.email}</label>
           <label className="w-full p-2 border border-gray-300 rounded-md">{usuario.phone}</label>
           <label className="w-full p-2 border border-gray-300 rounded-md">{usuario.address}</label>
+          <button onClick={handleToggelEdit} className='flex items-center botton-submit justify-center'> <FaEdit className='mr-1' />Editar</button>
         </div>
+        
       )}
-      <button onClick={handleToggelEdit} className='flex items-center'> <FaEdit className='mr-1' />Editar</button>
+      <section className='mt-4'>
+        <h3>Historial de reservas</h3>
+        <p>Continuará..</p>
+      </section>
     </div>
   );
 };

@@ -1,55 +1,56 @@
 export const Peticion = async (url, metodo, datosGuardar = "", archivos = false, credentials = "") => {
-
     let cargando = true;
 
     let opciones = {
-        method: "GET"
-    }
+        method: metodo,
+        credentials: credentials || "same-origin", // Por defecto usa "same-origin"
+    };
 
-    if (metodo == "GET" || metodo == "DELETE") {
+    // Si el método es GET o DELETE no necesitas cuerpo ni headers
+    if (metodo === "GET" || metodo === "DELETE") {
         opciones = {
             method: metodo,
             credentials,
         };
     }
 
-    if (metodo == "POST" || metodo == "PUT") {
-        
-        let body = JSON.stringify(datosGuardar);
+    // Para POST y PUT
+    if (metodo === "POST" || metodo === "PUT") {
+        // Si se envían archivos
         if (archivos) {
             opciones = {
                 method: metodo,
                 credentials,
-                body,
+                body: datosGuardar, // `datosGuardar` debería ser de tipo FormData
             };
         }
-        else if (credentials){
+        // Si no se envían archivos (petición con JSON)
+        else {
             opciones = {
                 method: metodo,
-                body,
                 credentials,
+                body: JSON.stringify(datosGuardar), // Los datos son en formato JSON
                 headers: {
-                    "Content-Type": "application/json"
-                }
-            };
-        } else {
-            opciones = {
-                method: metodo,
-                body: JSON.stringify(datosGuardar),
-                headers: {
-                    "Content-Type": "application/json"
-                }
+                    "Content-Type": "application/json", // Solo se aplica para JSON
+                },
             };
         }
     }
 
-    const peticion = await fetch(url, opciones);
-    const datos = await peticion.json();
-
-    cargando = false
-
-    return {
-        datos,
-        cargando
+    try {
+        const peticion = await fetch(url, opciones);
+        const datos = await peticion.json();
+        cargando = false;
+        return {
+            datos,
+            cargando
+        };
+    } catch (error) {
+        cargando = false;
+        return {
+            datos: null,
+            error: error.message,
+            cargando
+        };
     }
-} 
+};
