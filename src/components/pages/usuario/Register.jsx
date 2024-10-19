@@ -1,10 +1,11 @@
 import React from 'react';
-import { useForm } from '../../hooks/useForm';
-import { Peticion } from '../../helpers/Peticion';
-import { Global } from '../../helpers/Global';
+
+import { Peticion } from '../../../helpers/Peticion';
+import { Global } from '../../../helpers/Global';
 import { useNavigate } from 'react-router-dom';
-import { useErrorHandling } from '../../hooks/useErrorHandling';
-import useAuth from '../../hooks/useAuth';
+import { useErrorHandling } from '../../../hooks/useErrorHandling';
+import useAuth from '../../../hooks/useAuth';
+import { useForm } from '../../../hooks/useForm';
 
 export const Register = () => {
   const navigate = useNavigate();

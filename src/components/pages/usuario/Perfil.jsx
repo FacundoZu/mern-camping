@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Peticion } from '../../helpers/Peticion';
-import { Global } from '../../helpers/Global';
-import useAuth from '../../hooks/useAuth';
-import { useForm } from '../../hooks/useForm';
+import { Global } from '../../../helpers/Global';
+import useAuth from '../../../hooks/useAuth';
 import { FaEdit, FaUser } from "react-icons/fa";
+import { Peticion } from '../../../helpers/Peticion';
+import { useForm } from '../../../hooks/useForm';
 
 export const Perfil = () => {
 

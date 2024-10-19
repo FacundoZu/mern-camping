@@ -1,13 +1,13 @@
 import React from 'react'
 import { Home } from '../components/pages/Home'
-import { Login } from '../components/pages/Login'
-import { Register } from '../components/pages/Register'
-import { Perfil } from '../components/pages/Perfil'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import PrivateRoute from './PrivateRoute'
 import Layout from '../components/layout/Layout'
-import { Cabañas } from '../components/pages/Cabañas'
-import { Cabaña } from '../components/pages/Cabaña'
+import { Login } from '../components/pages/usuario/Login'
+import { Register } from '../components/pages/usuario/Register'
+import { Cabaña } from '../components/pages/cabañas/Cabaña'
+import { Perfil } from '../components/pages/usuario/Perfil'
+import { Cabañas } from '../components/pages/cabañas/Cabañas'
 
 export const Routing = () => {
   return (

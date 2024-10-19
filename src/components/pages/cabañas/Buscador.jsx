@@ -1,4 +1,5 @@
-import { useForm } from "../../hooks/useForm";
+import { useForm } from "../../../hooks/useForm";
+
 
 export const Buscador = ({ setFiltros }) => {
     const { formulario, cambiado } = useForm();
