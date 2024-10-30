@@ -25,7 +25,6 @@ export const Buscador = ({ setFiltros }) => {
                 
                 <h3 className='text-lg font-bold mb-2'>Filtrar por:</h3>
                 
-                {/* Capacidad */}
                 <label className='font-semibold mb-1'>Capacidad</label>
                 <select name="cantidadPersonas" defaultValue={"0"} onChange={manejarCambios} className='form-select mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'>
                     <option value="0">-</option>
@@ -35,7 +34,6 @@ export const Buscador = ({ setFiltros }) => {
                     <option value="8">8 Personas</option>
                 </select>
 
-                {/* Habitaciones */}
                 <label className='font-semibold mb-1'>Habitaciones</label>
                 <select name="cantidadHabitaciones" defaultValue={"0"} onChange={manejarCambios} className='form-select mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'>
                     <option value="0">-</option>
@@ -44,7 +42,6 @@ export const Buscador = ({ setFiltros }) => {
                     <option value="3">3 habitaciones</option>
                 </select>
 
-                {/* Baños */}
                 <label className='font-semibold mb-1'>Baños</label>
                 <select name="cantidadBaños" defaultValue={"0"} onChange={manejarCambios} className='form-select mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'>
                     <option value="0">-</option>

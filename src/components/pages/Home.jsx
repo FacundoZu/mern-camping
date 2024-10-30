@@ -13,8 +13,7 @@ export const Home = () => {
 
   return (
     <div>
-      {/* Imagen Principal Fija */}
-      <div className="relative h-screen bg-black/30">
+      <div className="relative h-screen bg-black/35">
         <img
           src="https://media.istockphoto.com/id/584589782/es/foto/tiendas-de-campa%C3%B1a-zona-de-acampada-temprano-en-la-ma%C3%B1ana-hermoso-lugar-natural.jpg?s=612x612&w=0&k=20&c=RPmP2NQWNM5GlXNXZBYmOYVh1-SdiEzWGd-RXPrCylo="
           alt="Imagen principal"
@@ -29,7 +28,6 @@ export const Home = () => {
           </h1>
 
           <section className="flex space-x-4 mt-6">
-            {/* Botón para Ver Cabañas */}
             <Link
               to='/cabañas'
               className="px-6 py-3 bg-lime-600 text-white text-xl rounded-md shadow-md hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-lime-400 transition-all"
@@ -37,7 +35,6 @@ export const Home = () => {
               Ver Cabañas
             </Link>
 
-            {/* Botón Contactar */}
             <button
               onClick={scrollToContact}
               className="px-6 py-3 bg-gray-200 text-gray-800 text-xl rounded-md shadow-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
@@ -48,7 +45,6 @@ export const Home = () => {
         </div>
       </div>
 
-      {/* Sección de Preguntas Frecuentes */}
       <section className="p-10 bg-gray-100">
         <h2 className="text-3xl font-bold text-center mb-6">Preguntas Frecuentes</h2>
         <div className="space-y-6">
@@ -67,7 +63,6 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* Formulario de Contacto */}
       <section id="contact-form" className="p-10 bg-gray-200">
         <h2 className="text-3xl font-bold text-center mb-6">Formulario de Contacto</h2>
         <form className="max-w-md mx-auto bg-white p-6 shadow-md rounded-md space-y-4">

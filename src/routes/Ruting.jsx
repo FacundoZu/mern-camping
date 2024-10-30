@@ -23,6 +23,8 @@ export const Routing = () => {
           <Route path='/cabaña/:id' element={<Cabaña />} />
           <Route path='/Perfil' element={<PrivateRoute ><Perfil /></PrivateRoute>} />
         </Route>
+
+        
       </Routes>
 
     </BrowserRouter>

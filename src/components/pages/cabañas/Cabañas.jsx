@@ -9,7 +9,8 @@ export const Cabañas = () => {
         descripcion: "",
         cantidadPersonas: "0",
         cantidadHabitaciones: "0",
-        cantidadBaños: "0"
+        cantidadBaños: "0",
+        servicios: ""
     });
 
     const toggleFiltros = () => {
@@ -17,10 +18,14 @@ export const Cabañas = () => {
     };
 
     return (
-        <div className={`flex lg:flex-row lg:space-x-6 mt-10 w-full px-4 ${mostrarFiltros ? 'flex-col' : 'flex'}`}>
+        <div className={`flex flex-col lg:flex-row lg:space-x-6 mt-10 w-full px-4 ${mostrarFiltros ? 'flex-col' : 'flex'}`}>
             <div className='lg:hidden mb-4 text-center'>
-                <button className={`bg-lime-600 text-white p-2 rounded-md shadow-md hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-lime-500 ${mostrarFiltros ? 'block w-full' : 'flex'}`} onClick={toggleFiltros}>
-                    {mostrarFiltros ? 'Ocultar Filtros' : <FaFilter />}
+                <button className={`flex items-center m-auto bg-lime-600 text-white p-2 rounded-md shadow-md hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-lime-500 ${mostrarFiltros ? 'block w-full' : 'flex'}`} onClick={toggleFiltros}>
+                    {mostrarFiltros ? 'Ocultar Filtros' : 
+                    <div className='flex gap-2 items-center'>
+                        <FaFilter />
+                        <p>Mostrar filtros</p>
+                    </div> }
                 </button>
             </div>
 

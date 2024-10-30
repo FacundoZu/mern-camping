@@ -21,7 +21,7 @@ export default function Header() {
   }
 
   return (
-    <header className='bg-slate-200 shadow-md'>
+    <header className=' bg-slate-300 shadow-md'>
       <div className='flex justify-between items-center text-balance max-w-6xl mx-auto p-3'>
         <Link to="/">
           <h1 className='font-bold text-sm sm:text-xl flex items-center'>
@@ -62,7 +62,7 @@ export default function Header() {
 
             </div>
           ):(
-            <Link to="/login" className="text-lime-600 font-medium text-sm hidden sm:inline transition duration-200">
+            <Link to="/login" className="text-lime-600 font-medium text-lg hidden sm:inline transition duration-200">
               Iniciar sesión
             </Link>
           )}
