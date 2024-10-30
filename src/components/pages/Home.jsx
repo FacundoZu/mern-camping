@@ -1,6 +1,7 @@
 import React from "react";
 import { RiLeafFill } from "react-icons/ri";
 import { Link } from "react-router-dom";
+import { Actividades } from "./utils/Actividades";
 
 export const Home = () => {
 
@@ -14,8 +15,7 @@ export const Home = () => {
   return (
     <div>
       <div className="relative h-screen bg-black/35">
-        <img
-          src="https://media.istockphoto.com/id/584589782/es/foto/tiendas-de-campa%C3%B1a-zona-de-acampada-temprano-en-la-ma%C3%B1ana-hermoso-lugar-natural.jpg?s=612x612&w=0&k=20&c=RPmP2NQWNM5GlXNXZBYmOYVh1-SdiEzWGd-RXPrCylo="
+        <img src="https://media.istockphoto.com/id/584589782/es/foto/tiendas-de-campa%C3%B1a-zona-de-acampada-temprano-en-la-ma%C3%B1ana-hermoso-lugar-natural.jpg?s=612x612&w=0&k=20&c=RPmP2NQWNM5GlXNXZBYmOYVh1-SdiEzWGd-RXPrCylo="
           alt="Imagen principal"
           className="absolute top-0 left-0 w-full h-full object-cover z-[-1]"
           style={{ position: 'fixed' }}
@@ -44,24 +44,30 @@ export const Home = () => {
           </section>
         </div>
       </div>
+      
+      <section className="p-10 bg-gray-200 m-auto w-screen">
+        <h2 className="text-3xl font-bold text-center mb-6">Que hacer en el Camping</h2>
+        <Actividades />
+      </section>
 
       <section className="p-10 bg-gray-100">
         <h2 className="text-3xl font-bold text-center mb-6">Preguntas Frecuentes</h2>
-        <div className="space-y-6">
+        <div className="space-y-6 max-w-screen-lg m-auto">
           <div className="bg-white p-6 shadow-md rounded-md">
-            <h3 className="text-xl font-semibold">¿Cómo puedo registrarme?</h3>
+            <h3 className="mt-2 font-semibold text-xl">¿Cómo puedo registrarme?</h3>
             <p>Puedes registrarte haciendo clic en el botón de "Registro" en la esquina superior derecha.</p>
           </div>
           <div className="bg-white p-6 shadow-md rounded-md">
-            <h3 className="text-xl font-semibold">¿Dónde puedo encontrar información sobre los servicios?</h3>
+            <h3 className="mt-2 font-semibold text-xl">¿Dónde puedo encontrar información sobre los servicios?</h3>
             <p>En la sección de "Servicios" puedes encontrar información detallada sobre todo lo que ofrecemos.</p>
           </div>
           <div className="bg-white p-6 shadow-md rounded-md">
-            <h3 className="text-xl font-semibold">¿Cómo puedo contactar con soporte?</h3>
+            <h3 className="mt-2 font-semibold text-xl">¿Cómo puedo contactar con soporte?</h3>
             <p>Puedes enviarnos un mensaje utilizando el formulario de contacto a continuación.</p>
           </div>
         </div>
       </section>
+
 
       <section id="contact-form" className="p-10 bg-gray-200">
         <h2 className="text-3xl font-bold text-center mb-6">Formulario de Contacto</h2>
