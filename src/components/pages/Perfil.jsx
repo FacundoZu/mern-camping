@@ -4,16 +4,18 @@ import { Global } from '../../helpers/Global';
 import useAuth from '../../hooks/useAuth';
 import { useForm } from '../../hooks/useForm';
 import { FaEdit } from "react-icons/fa";
-import { Navigate } from 'react-router-dom';
 
 export const Perfil = () => {
 
-  const { auth } = useAuth()
+  const { auth, setAuth } = useAuth()
   const [usuario, setUsuario] = useState(auth)
-  const { setAuth } = useAuth();
-  const [mensajeError, setMensajeError] = useState(null);
-  const [edit, setEdit] = useState(false);
   const { formulario, cambiado } = useForm();
+
+  const [mensajeError, setMensajeError] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [edit, setEdit] = useState(false);
+
 
   const handleToggelEdit = () => {
     setEdit(!edit)
@@ -21,7 +23,9 @@ export const Perfil = () => {
 
   useEffect(() => {
     const usuariocompleto = async () => {
+
       const { datos } = await Peticion(Global.url + "user/completeProfile", "GET", null, false, 'include');
+
       if (datos) {
         setUsuario(datos.user)
       }
@@ -29,8 +33,30 @@ export const Perfil = () => {
     usuariocompleto();
   }, [])
 
+  const onFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+
+    if (file) {
+      const imageURL = URL.createObjectURL(file);
+      setPreviewImage(imageURL);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+
+    const response = await fetch("http://localhost:3900/api/user/subir-imagen", {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
 
     const { datos } = await Peticion(Global.url + "user/editUser", "POST", formulario, false, 'include');
 
@@ -51,9 +77,22 @@ export const Perfil = () => {
       <img src={auth.image} alt="" />
       {edit ? (
         <form onSubmit={handleSubmit} className="space-y-4">
+          {previewImage && (
+            <div className="image-preview">
+              <img src={previewImage} alt="Vista previa" className="w-48 h-48 object-cover" />
+            </div>
+          )}
+          <input
+            type="file"
+            id="fileInput"
+            name="image"
+            onChange={onFileChange} // Maneja la selección del archivo
+            className="mt-2 p-2 border border-gray-300 rounded-md shadow-sm"
+            accept="image/*" // Limita la selección a imágenes
+          />
           <div>
             <input type="text" name="name" defaultValue={usuario.name} onChange={cambiado}
-              className="w-full p-2 border border-gray-300 rounded-md" required />
+              className="form-input" required />
           </div>
           <div>
             <label className="w-full p-2">{usuario.email}</label>
@@ -64,7 +103,7 @@ export const Perfil = () => {
               name="phone"
               defaultValue={usuario.phone}
               onChange={cambiado}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="form-input"
             />
           </div>
           <div>
@@ -73,11 +112,11 @@ export const Perfil = () => {
               name="address"
               defaultValue={usuario.address}
               onChange={cambiado}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="form-input"
             />
           </div>
           {edit && (
-            <button type="submit" className="w-full bg-lime-600 text-white py-2 rounded-md shadow-md hover:bg-lime-700">
+            <button type="submit" className="botton-submit">
               Guardar Cambios
             </button>
           )}
@@ -85,6 +124,8 @@ export const Perfil = () => {
         </form>
       ) : (
         <div className="space-y-4 flex flex-col">
+          {
+          }
           <label className="w-full p-2 border border-gray-300 rounded-md">{usuario.name}</label>
           <label className="w-full p-2 border border-gray-300 rounded-md">{usuario.email}</label>
           <label className="w-full p-2 border border-gray-300 rounded-md">{usuario.phone}</label>

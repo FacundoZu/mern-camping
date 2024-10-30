@@ -22,10 +22,9 @@ export const AuthProvider = ({ children }) => {
                     "Content-Type": "application/json",
                 },
             });
-            
             if (request.status === 400) {
                 setAuth(null);
-                console.clear()
+                //onsole.clear()
                 return;
             }
 
