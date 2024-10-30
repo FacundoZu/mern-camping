@@ -1,10 +1,17 @@
-import React, { useContext, useState } from 'react';
+import React, {  useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+<<<<<<< HEAD:src/components/pages/Login.jsx
 import { Peticion } from '../../helpers/Peticion';
 import { Global } from '../../helpers/Global';
 import { useForm } from '../../hooks/useForm';
 import { AuthContext } from '../../context/AuthContext';
 import useAuth from '../../hooks/useAuth';
+=======
+import { Peticion } from '../../../helpers/Peticion';
+import { Global } from '../../../helpers/Global';
+import { useForm } from '../../../hooks/useForm';
+import useAuth from '../../../hooks/useAuth';
+>>>>>>> fc298d38e9eaf3a54c2ce428dfa0d74392bf072d:src/components/pages/usuario/Login.jsx
 import { FcGoogle } from "react-icons/fc";
 
 export const Login = () => {
