@@ -48,6 +48,10 @@ export const MenuPerfil = ({ handleToggle = null }) => {
                         </div>
                     </div>
                     <hr className='my-1 h-px w-full bg-gray-300 border-0 dark:bg-gray-600' />
+                    {auth && auth.role == "admin" &&<Link to='/admin/dashboard' className="text-slate-700 m-1.5 rounded-lg p-2 font-medium text-sm sm:hidden flex items-center justify-center hover:bg-slate-300">
+                        <IoHome className='mr-1 text-slate-500' />
+                        Dashboard
+                    </Link>}
                     <Link to='/' className="text-slate-700 m-1.5 rounded-lg p-2 font-medium text-sm sm:hidden flex items-center justify-center hover:bg-slate-300">
                         <IoHome className='mr-1 text-slate-500' />
                         Home
@@ -58,7 +62,7 @@ export const MenuPerfil = ({ handleToggle = null }) => {
                     </Link>
                     <Link to='/perfil' className="text-slate-700 m-1.5 rounded-lg p-2 font-medium text-sm sm:text-base flex items-center justify-center hover:bg-slate-300">
                         <FaEdit className='mr-1 text-slate-500' />
-                        Editar Perfil
+                        Perfil
                     </Link>
                     <hr className='my-1 h-px w-full bg-gray-300 border-0 dark:bg-gray-600' />
                     <button onClick={logout} className="text-slate-700 m-1.5 rounded-lg p-2 font-medium text-sm sm:text-base flex items-center justify-center hover:bg-slate-300">

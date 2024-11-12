@@ -33,8 +33,10 @@ export const Actividades = () => {
     if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
     return (
-        <div className="flex flex-col gap-6 p-4">
-            {actividades.map((actividad) => (
+        <div className="flex flex-col gap-6 p-4 max-w-screen-2xl m-auto">
+            <h2 className="text-3xl font-bold text-center mb-6">Que hacer en el Camping</h2> 
+            {actividades && actividades.map((actividad) => (
+                actividad.estado == 'Habilitado' &&
                 <div key={actividad._id} className="flex flex-col md:flex-row bg-white shadow-md rounded-lg overflow-hidden border border-gray-200 w-full mx-auto">
                     <img className="w-full md:w-1/4 object-cover h-auto" src={actividad.imagen} alt={`Imagen de ${actividad.titulo}`} />
                     <div className="w-full md:w-3/4 p-4 flex flex-col justify-between">

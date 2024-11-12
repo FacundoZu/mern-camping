@@ -5,28 +5,7 @@ import { PiUsersThreeFill, PiToiletBold } from "react-icons/pi";
 import { MdOutlineBedroomChild } from "react-icons/md";
 import { Link } from 'react-router-dom';
 
-export const ListadoCabañas = ({ filtros }) => {
-    const [cabañas, setCabañas] = useState([]);
-    const [cargando, setCargando] = useState(true);
-
-    useEffect(() => {
-        const todasLasCabañas = async () => {
-            let url = Global.url + "cabin/getCabins";
-
-            const queryParams = new URLSearchParams(filtros).toString();
-            if (queryParams) {
-                url += `?${queryParams}`;
-            }
-
-            const { datos, cargando } = await Peticion(url, "GET", null, false, 'include');
-
-            if (datos) {
-                setCabañas(datos.cabins);
-                setCargando(false);
-            }
-        };
-        todasLasCabañas();
-    }, [filtros]);
+export const ListadoCabañas = ({ cabañas, cargando }) => {
 
     return (
         <div className="container mx-auto p-6">
@@ -40,6 +19,7 @@ export const ListadoCabañas = ({ filtros }) => {
             ) : (
                 <div className="space-y-6">
                     {cabañas && cabañas.map(cabaña => (
+                        cabaña && cabaña.estado == 'Disponible' &&
                         <Link
                             to={`/cabaña/${cabaña._id}`}
                             key={cabaña._id}
@@ -53,6 +33,7 @@ export const ListadoCabañas = ({ filtros }) => {
                                     title={cabaña.nombre}
                                 />
                                 <div className="p-4 flex-1 w-full">
+                                    <h1 className="text-xl font-semibold mb-2">{cabaña.nombre}</h1>
                                     <h2 className="text-lg font-semibold mb-2">{cabaña.descripcion}</h2>
                                     {cabaña.imagenes && cabaña.imagenes.length > 0 && (
                                         <div className="grid grid-cols-3 gap-2 mt-4">
@@ -77,6 +58,7 @@ export const ListadoCabañas = ({ filtros }) => {
                                     <div className='flex gap-4 m-2'>
                                         {cabaña.servicios.length > 0 ? (
                                             cabaña.servicios.map((servicio) => (
+                                                servicio.estado == 'Habilitado' &&
                                                 <div key={servicio._id} className="relative group">
                                                     <img
                                                         src={servicio.imagen}
@@ -95,7 +77,6 @@ export const ListadoCabañas = ({ filtros }) => {
                         </Link>
                     ))}
                 </div>
-
             )}
         </div>
     );

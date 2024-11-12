@@ -2,6 +2,7 @@ import React from "react";
 import { RiLeafFill } from "react-icons/ri";
 import { Link } from "react-router-dom";
 import { Actividades } from "./utils/Actividades";
+import { Preguntas } from "./utils/Preguntas";
 
 export const Home = () => {
 
@@ -46,26 +47,11 @@ export const Home = () => {
       </div>
       
       <section className="p-10 bg-gray-200 m-auto w-screen">
-        <h2 className="text-3xl font-bold text-center mb-6">Que hacer en el Camping</h2>
         <Actividades />
       </section>
 
       <section className="p-10 bg-gray-100">
-        <h2 className="text-3xl font-bold text-center mb-6">Preguntas Frecuentes</h2>
-        <div className="space-y-6 max-w-screen-lg m-auto">
-          <div className="bg-white p-6 shadow-md rounded-md">
-            <h3 className="mt-2 font-semibold text-xl">¿Cómo puedo registrarme?</h3>
-            <p>Puedes registrarte haciendo clic en el botón de "Registro" en la esquina superior derecha.</p>
-          </div>
-          <div className="bg-white p-6 shadow-md rounded-md">
-            <h3 className="mt-2 font-semibold text-xl">¿Dónde puedo encontrar información sobre los servicios?</h3>
-            <p>En la sección de "Servicios" puedes encontrar información detallada sobre todo lo que ofrecemos.</p>
-          </div>
-          <div className="bg-white p-6 shadow-md rounded-md">
-            <h3 className="mt-2 font-semibold text-xl">¿Cómo puedo contactar con soporte?</h3>
-            <p>Puedes enviarnos un mensaje utilizando el formulario de contacto a continuación.</p>
-          </div>
-        </div>
+        <Preguntas />
       </section>
 
 

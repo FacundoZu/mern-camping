@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { format, parse, startOfWeek, getDay, isWithinInterval, isBefore, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import Modal from './Modal';
+
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import useAuth from '../../../../hooks/useAuth';
 
@@ -19,7 +19,7 @@ const localizer = dateFnsLocalizer({
 });
 
 const ErrorMessage = ({ message }) => (
-  <div className="bg-red-500 text-white p-3 rounded mb-4">
+  <div className="bg-red-500 opacity-80 text-white p-3 rounded mb-4">
     {message}
   </div>
 );
@@ -28,11 +28,8 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
   const [eventos, setEventos] = useState([]);
   const [fechaInicioSeleccionada, setFechaInicioSeleccionada] = useState(null);
   const [fechaFinSeleccionada, setFechaFinSeleccionada] = useState(null);
+  const [mensajeConflicto, setMensajeConflicto] = useState('');
   const { auth } = useAuth();
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [modalTitle, setModalTitle] = useState('');
 
   useEffect(() => {
     const obtenerEventos = () => {
@@ -53,10 +50,14 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
     };
 
     obtenerEventos();
-  }, [reservas, userId]);
+  }, [reservas, auth]);
 
   const eventStyleGetter = (event) => {
-    const backgroundColor = event.isUserReservation ? '#65a30d' : '#475569';
+    const backgroundColor = event.isTemporary
+      ? '#ffa500'
+      : event.isUserReservation
+        ? '#65a30d'
+        : '#475569';
     const style = {
       backgroundColor,
       borderRadius: '5px',
@@ -71,8 +72,49 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
   };
 
   const handleSelectSlot = ({ start, end }) => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    if (isBefore(start, hoy)) {
+      setMensajeConflicto('No puedes seleccionar fechas anteriores al día de hoy.');
+      return;
+    }
+    const adjustedEnd = new Date(end);
+
     setFechaInicioSeleccionada(start);
-    setFechaFinSeleccionada(end);
+    setFechaFinSeleccionada(adjustedEnd);
+
+    const hayConflicto = Array.isArray(reservas) && reservas.length > 0
+      ? reservas.some((reserva) => {
+        const reservaInicio = new Date(reserva.fechaInicio);
+        const reservaFin = new Date(reserva.fechaFinal);
+        return (
+          isWithinInterval(start, { start: reservaInicio, end: reservaFin }) ||
+          isWithinInterval(adjustedEnd, { start: reservaInicio, end: reservaFin }) ||
+          (start <= reservaInicio && adjustedEnd >= reservaFin)
+        );
+      })
+      : false;
+
+    if (hayConflicto) {
+      setMensajeConflicto('Las fechas seleccionadas se superponen con una reserva existente o está proxima a otra.');
+    } else {
+      setMensajeConflicto('');
+    }
+
+    const eventoTemporal = {
+      title: 'Reserva seleccionada',
+      start,
+      end: adjustedEnd,
+      allDay: true,
+      isUserReservation: true,
+      isTemporary: true,
+    };
+
+    setEventos((prevEventos) => [
+      ...prevEventos.filter((event) => event.title !== 'Reserva seleccionada'),
+      eventoTemporal,
+    ]);
   };
 
   const handleReservar = async () => {
@@ -82,11 +124,7 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
         fechaFinal: fechaFinSeleccionada.toISOString(),
       });
 
-      console.log(response)
-      if (response.datos?.status == "success") {
-        setModalTitle('Reserva Exitosa');
-        setModalMessage('Tu reserva se ha realizado con éxito!');
-        setIsModalOpen(true);
+      if (response.datos?.status === 'success') {
         setFechaInicioSeleccionada(null);
         setFechaFinSeleccionada(null);
       }
@@ -103,23 +141,23 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
             events={eventos}
             startAccessor="start"
             endAccessor="end"
-            selectable={true}
+            selectable
             onSelectSlot={handleSelectSlot}
             views={['month']}
             defaultView="month"
             culture="es"
             messages={{
-              next: "Sig",
-              previous: "Ant",
-              today: "Hoy",
-              month: "Mes",
-              week: "Semana",
-              day: "Día",
-              agenda: "Agenda",
-              date: "Fecha",
-              time: "Hora",
-              event: "Evento",
-              noEventsInRange: "No hay eventos en este rango.",
+              next: 'Sig',
+              previous: 'Ant',
+              today: 'Hoy',
+              month: 'Mes',
+              week: 'Semana',
+              day: 'Día',
+              agenda: 'Agenda',
+              date: 'Fecha',
+              time: 'Hora',
+              event: 'Evento',
+              noEventsInRange: 'No hay eventos en este rango.',
             }}
             eventPropGetter={eventStyleGetter}
           />
@@ -130,39 +168,35 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
               <p className="font-semibold text-lime-800">
                 Fecha de inicio:
                 <span className="font-normal text-lime-600">
-                  {fechaInicioSeleccionada.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {' '}{fechaInicioSeleccionada.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </span>
+                . Todo el día.
               </p>
               <p className="font-semibold text-lime-800 mt-2">
                 Fecha de fin:
                 <span className="font-normal text-lime-600">
-                  {fechaFinSeleccionada.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {' '}{fechaFinSeleccionada.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </span>
+                . A las 10:00 AM.
               </p>
             </div>
           ) : (
             <p className="text-lg text-gray-700">Selecciona un rango de fechas para hacer la reserva.</p>
           )}
 
+          {mensajeConflicto && <ErrorMessage message={mensajeConflicto} />}
           {mensajeError && <ErrorMessage message={mensajeError} />}
 
           <button onClick={handleReservar} className="mt-4 bg-lime-500 text-white py-3 px-6 rounded-lg hover:bg-lime-600">
             Reservar
           </button>
-          {onClose && (<button onClick={onClose} className="mt-4 bg-lime-500 text-white py-3 px-6 rounded-lg hover:bg-lime-600 ml-10">
-            Cerrar
-          </button>
+          {onClose && (
+            <button onClick={onClose} className="mt-4 bg-lime-500 text-white py-3 px-6 rounded-lg hover:bg-lime-600 ml-10">
+              Cerrar
+            </button>
           )}
-
         </div>
       </div>
-
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={modalTitle}
-        message={modalMessage}
-      />
     </div>
   );
 };
