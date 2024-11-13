@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import { RiLeafFill } from "react-icons/ri";
 import { FaUser } from "react-icons/fa";
 import { Link } from 'react-router-dom';
-import useAuth from '../../hooks/useAuth';
-import { MenuPerfil } from './MenuPerfil';
+
 import { CgDetailsMore } from "react-icons/cg";
+import useAuth from '../../hooks/useAuth';
+import { MenuPerfil } from '../layout/MenuPerfil';
 
 
 export default function Header() {
 
   const [menu, setMenu] = useState(false);
   const { auth, loading } = useAuth();
-  
+
   useEffect(() => {
     setMenu(false)
   }, [])
@@ -21,19 +21,9 @@ export default function Header() {
   }
 
   return (
-    <header className=' bg-slate-300 shadow-md'>
-      <div className='flex justify-between items-center text-balance max-w-6xl mx-auto p-3'>
-        <Link to="/">
-          <h1 className='font-bold text-sm sm:text-xl flex items-center'>
-            <RiLeafFill className='text-lime-600 justify-center mr-1' />
-            <span className='text-slate-500'>Camping</span>
-            <span className='text-slate-700'>Cachi</span>
-          </h1>
-        </Link>
-        <ul className='relative flex items-center gap-6'>
-          { auth && auth.role == "admin" && <Link to="/admin/dashboard" className="text-slate-600 hover:underline hidden sm:inline font-medium">
-              <li>Dashboard</li>
-          </Link>}
+    <header className='bg-slate-300 shadow-md'>
+      <div className='text-balance p-3'>
+        <ul className='flex items-center gap-6 relative justify-end container px-8 '>
           <Link to="/" className="text-slate-600 hover:underline hidden sm:inline font-medium">
             <li>Home</li>
           </Link>
@@ -48,7 +38,7 @@ export default function Header() {
             <MenuPerfil handleToggle={handleToggle} />
           )}
 
-          {auth && !loading ? (
+          {auth && !loading && 
 
             <div className="flex items-center gap-4">
 
@@ -63,12 +53,7 @@ export default function Header() {
                 )}
               </button>
 
-            </div>
-          ):(
-            <Link to="/login" className="text-lime-600 font-medium text-lg hidden sm:inline transition duration-200">
-              Iniciar sesión
-            </Link>
-          )}
+            </div>}
         </ul>
       </div>
     </header>

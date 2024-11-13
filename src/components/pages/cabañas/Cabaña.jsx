@@ -11,6 +11,7 @@ import { CalendarioReservas } from './utils/CalendarioReservas';
 import { CabañaSwiper } from './utils/CabañaSwiper.jsx';
 import { CalendarioModal } from './utils/CalendarioModal.jsx';
 import useAuth from '../../../hooks/useAuth';
+import Modal from '../utils/Modal.jsx';
 
 export const Cabaña = () => {
     const { id } = useParams();
@@ -21,6 +22,15 @@ export const Cabaña = () => {
     const { auth } = useAuth();
 
     const [isCalModalOpen, setIsCalModalOpen] = useState(false);
+
+    const [fechaInicio, setFechaInicio] = useState(null);
+    const [fechaFin, setFechaFin] = useState(null);
+    const [precioTotal, setPrecioTotal] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [modalTitle, setModalTitle] = useState('');
+
+    const [isConfirming, setIsConfirming] = useState(false);
 
     useEffect(() => {
         const obtenerCabañaYReservas = async () => {
@@ -47,13 +57,37 @@ export const Cabaña = () => {
         return diasDeEstancia * cabaña.precio;
     };
 
-    const handleReservar = async (fechas) => {
+    const handleReservar = (fechas) => {
+        setFechaInicio(fechas.fechaInicio);
+        setFechaFin(fechas.fechaFinal);
+        const total = calcularPrecioTotal(fechas.fechaInicio, fechas.fechaFinal);
+        setPrecioTotal(total);
+
+        setIsConfirming(true);
+        setModalTitle('Confirmar Reserva');
+        setModalMessage(`
+            <div style="text-align: center; padding: 20px; background: #f9fafb; border-radius: 8px; border: 2px dashed #4CAF50; max-width: 400px; margin: 0 auto;">
+                <h2 style="font-size: 24px; color: #4CAF50; font-weight: bold;">¡Estás a punto de reservar!</h2>
+                <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
+                <strong>Detalles de la reserva:</strong>
+                </p>
+                <div style="font-size: 14px; color: #333; margin-bottom: 10px;">
+                    <div><strong>Fecha de inicio:</strong> ${new Date(fechas.fechaInicio).toLocaleDateString('es-ES')}</div>
+                    <div><strong>Fecha de fin:</strong> ${new Date(fechas.fechaFinal).toLocaleDateString('es-ES')}</div>
+                    <div><strong>Precio total:</strong> ${total} €</div>
+                </div>
+            </div>
+        `);
+        setIsModalOpen(true);
+    };
+
+    const handleConfirmReservation = async () => {
         const nuevaReserva = {
             usuarioId: auth.id,
             cabaniaId: cabaña._id,
-            fechaInicio: fechas.fechaInicio,
-            fechaFinal: fechas.fechaFinal,
-            precioTotal: calcularPrecioTotal(fechas.fechaInicio, fechas.fechaFinal)
+            fechaInicio,
+            fechaFinal: fechaFin,
+            precioTotal
         };
 
         const url = `${Global.url}reservation/createReservation`;
@@ -63,20 +97,39 @@ export const Cabaña = () => {
 
             if (response.datos?.status === 'success') {
                 setMensajeError(null);
-                setReservas((prevReservas) => [...prevReservas, nuevaReserva]);
-                return response
+                setReservas((prevReservas) => (Array.isArray(prevReservas) ? [...prevReservas, nuevaReserva] : [nuevaReserva]));
+                setModalTitle('Reserva Confirmada');
+                setModalMessage(`
+                    <div style="text-align: center; padding: 20px; background: #f9fafb; border-radius: 8px; border: 2px dashed #4CAF50; max-width: 400px; margin: 0 auto;">
+                        <h2 style="font-size: 24px; color: #4CAF50; font-weight: bold;">¡Reserva Confirmada!</h2>
+                        <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
+                        <strong>¡Tu reserva ha sido completada con éxito!</strong>
+                        </p>
+                        <div style="font-size: 14px; color: #333; margin-bottom: 10px;">
+                            <div><strong>Fecha de inicio:</strong> ${new Date(fechaInicio).toLocaleDateString('es-ES')}</div>
+                            <div><strong>Fecha de fin:</strong> ${new Date(fechaFin).toLocaleDateString('es-ES')}</div>
+                            <div><strong>Precio total:</strong> ${precioTotal} €</div>
+                        </div>
+                        <div style="padding: 10px 0; border-top: 2px solid #4CAF50; margin-top: 20px;">
+                            <span style="font-size: 14px; color: #4CAF50;">Gracias por tu preferencia. ¡Nos vemos pronto!</span>
+                        </div>
+                    </div>
+                `);
+                setIsConfirming(false);
             } else if (response.datos?.mensaje) {
                 setMensajeError(response.datos.mensaje);
             }
         } catch (error) {
             setMensajeError('Error al guardar la reserva, intenta nuevamente.');
             console.error(error);
+        } finally {
+            setIsModalOpen(true);
         }
     };
 
     const handleShowCalendaro = () => {
-        setIsCalModalOpen(true)
-    }
+        setIsCalModalOpen(true);
+    };
 
     return (
         <div className="container mx-auto p-6 max-w-screen-xl">
@@ -88,12 +141,13 @@ export const Cabaña = () => {
                     <div className="p-4">
 
                         <h1 className="text-2xl font-semibold text-center text-lime-700 py-4">{cabaña.descripcion}</h1>
-                        <hr className='mt-4'/>
+                        <hr className='mt-4' />
                         {cabaña.servicios && (
                             <div className="mt-6">
                                 <div className="flex flex-wrap">
                                     {cabaña.servicios.length > 0 ? (
                                         cabaña.servicios.map((servicio) => (
+                                            servicio.estado == 'Habilitado' &&
                                             <div key={servicio._id} className="grid grid-rows-3 gap-0 p-4 bg-white m-auto h-44 w-60">
                                                 <img src={servicio.imagen} alt={servicio.nombre} className="w-12 h-12 mx-auto mb-2 object-cover" />
                                                 <p className="text-base text-gray-700 font-medium text-center my-auto">
@@ -110,7 +164,7 @@ export const Cabaña = () => {
                                         </div>
                                     )}
                                 </div>
-                                 
+
                                 <div className='flex gap-4 mt-4 mx-10'>
                                     <div className="flex items-center gap-2 bg-slate-50 rounded-lg w-full p-3 md:w-1/3 border border-lime-300">
                                         <PiUsersThreeFill className="text-2xl text-lime-600" />
@@ -130,7 +184,7 @@ export const Cabaña = () => {
                                 </div>
                             </div>
                         )}
-                        <hr className='pt-4 mt-8'/>
+                        <hr className='pt-4 mt-8' />
                         <div className="min-h-screen  items-center justify-center bg-gray-100 hidden sm:inline">
                             <CalendarioReservas reservas={reservas} onReservar={handleReservar} mensajeError={mensajeError} />
                         </div>
@@ -146,6 +200,14 @@ export const Cabaña = () => {
             ) : (
                 <div className="text-center text-gray-500">No se encontró la cabaña.</div>
             )}
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title={modalTitle}
+                message={modalMessage}
+                onConfirm={isConfirming ? handleConfirmReservation : null}
+                showConfirmButton={isConfirming}
+            />
         </div>
     );
 };

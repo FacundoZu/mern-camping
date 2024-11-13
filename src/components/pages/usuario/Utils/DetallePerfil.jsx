@@ -12,7 +12,7 @@ export const Detalleperfil = ({ usuario, handleToggelEdit }) => {
             <label className="w-full p-2 border border-gray-300 rounded-md h-10">{usuario.phone}</label>
             <label> Dirección </label>
             <label className="w-full p-2 border border-gray-300 rounded-md h-10">{usuario.address}</label>
-            <button onClick={handleToggelEdit} className='flex items-center botton-submit justify-center'>
+            <button onClick={handleToggelEdit} className='flex items-center botton-submit max-w-20 justify-center'>
                 <FaEdit className='mr-1' />Editar
             </button>
         </div>

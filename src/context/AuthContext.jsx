@@ -24,7 +24,6 @@ export const AuthProvider = ({ children }) => {
             });
             if (request.status === 400) {
                 setAuth(null);
-                //onsole.clear()
                 return;
             }
 
