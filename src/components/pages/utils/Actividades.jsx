@@ -30,11 +30,11 @@ export const Actividades = () => {
     };
 
     if (loading) return <p className="text-center text-gray-500">Cargando actividades...</p>;
-    if (error) return <p className="text-center text-red-500">Error: {error}</p>;
+
 
     return (
         <div className="flex flex-col gap-6 p-4">
-            {actividades.map((actividad) => (
+            {actividades && actividades.map((actividad) => (
                 <div key={actividad._id} className="flex flex-col md:flex-row bg-white shadow-md rounded-lg overflow-hidden border border-gray-200 w-full mx-auto">
                     <img className="w-full md:w-1/4 object-cover h-auto" src={actividad.imagen} alt={`Imagen de ${actividad.titulo}`} />
                     <div className="w-full md:w-3/4 p-4 flex flex-col justify-between">

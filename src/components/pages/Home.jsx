@@ -14,9 +14,6 @@ export const Home = () => {
 
   return (
     <div>
-<<<<<<< HEAD
-      rat
-=======
       <div className="relative h-screen bg-black/35">
         <img src="https://media.istockphoto.com/id/584589782/es/foto/tiendas-de-campa%C3%B1a-zona-de-acampada-temprano-en-la-ma%C3%B1ana-hermoso-lugar-natural.jpg?s=612x612&w=0&k=20&c=RPmP2NQWNM5GlXNXZBYmOYVh1-SdiEzWGd-RXPrCylo="
           alt="Imagen principal"
@@ -110,7 +107,6 @@ export const Home = () => {
           </button>
         </form>
       </section>
->>>>>>> fc298d38e9eaf3a54c2ce428dfa0d74392bf072d
     </div>
   );
 };
