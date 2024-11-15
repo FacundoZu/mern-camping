@@ -7,17 +7,39 @@ export const AdminCabaña = () => {
     const [cabañas, setCabañas] = useState([]);
     const [cargando, setCargando] = useState(true);
 
+    const [nombreFiltro, setNombreFiltro] = useState('');
+    const [reservasFiltro, setReservasFiltro] = useState('');
+    const [habitacionesFiltro, setHabitacionesFiltro] = useState('');
+    const [bañosFiltro, setBañosFiltro] = useState('');
+    const [personasFiltro, setPersonasFiltro] = useState('');
+
+    const [orden, setOrden] = useState({ columna: 'nombre', tipo: 'asc' }); 
+
     useEffect(() => {
         const todasLasCabañas = async () => {
             let url = Global.url + "cabin/getCabins";
-            const { datos, cargando } = await Peticion(url, "GET", '', false, 'include');
+            const { datos } = await Peticion(url, "GET", '', false, 'include');
             if (datos) {
-                setCabañas(datos.cabins);
+                const cabañasConReservas = datos.cabins.map(cabaña => {
+                    cabaña.reservasHistoricas = cabaña.reservas ? cabaña.reservas.length : 0;
+                    return cabaña;
+                });
+                setCabañas(cabañasConReservas);
                 setCargando(false);
             }
         };
         todasLasCabañas();
     }, []);
+
+    const cabañasFiltradas = cabañas.filter(cabaña => {
+        return (
+            (!nombreFiltro || cabaña.nombre.toLowerCase().includes(nombreFiltro.toLowerCase())) &&
+            (!reservasFiltro || cabaña.reservasHistoricas >= parseInt(reservasFiltro)) &&
+            (!habitacionesFiltro || cabaña.cantidadHabitaciones >= parseInt(habitacionesFiltro)) &&
+            (!bañosFiltro || cabaña.cantidadBaños >= parseInt(bañosFiltro)) &&
+            (!personasFiltro || cabaña.cantidadPersonas >= parseInt(personasFiltro))
+        );
+    });
 
     const cambiarEstado = async (id, estado) => {
         let url = Global.url + `cabin/cambiarEstado/${id}`;
@@ -33,6 +55,20 @@ export const AdminCabaña = () => {
         }
     };
 
+    const ordenarCabañas = (columna) => {
+        const nuevoOrden = orden.columna === columna && orden.tipo === 'asc' ? 'desc' : 'asc';
+        setOrden({ columna, tipo: nuevoOrden });
+
+        const cabañasOrdenadas = [...cabañasFiltradas].sort((a, b) => {
+            if (nuevoOrden === 'asc') {
+                return a[columna] < b[columna] ? -1 : 1;
+            }
+            return a[columna] > b[columna] ? -1 : 1;
+        });
+
+        setCabañas(cabañasOrdenadas);
+    };
+
     return (
         <div className="p-6 bg-white rounded-lg shadow-lg max-w-screen-xl mx-auto mt-8">
             <div className="flex justify-between items-center mb-6">
@@ -44,41 +80,127 @@ export const AdminCabaña = () => {
                     Crear Nueva Cabaña
                 </Link>
             </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                <input
+                    type="text"
+                    placeholder="Buscar por nombre"
+                    value={nombreFiltro}
+                    onChange={(e) => setNombreFiltro(e.target.value)}
+                    className="p-2 border rounded"
+                />
+                <input
+                    type="number"
+                    placeholder="Mín. reservas"
+                    value={reservasFiltro}
+                    onChange={(e) => setReservasFiltro(e.target.value)}
+                    className="p-2 border rounded"
+                />
+                <input
+                    type="number"
+                    placeholder="Mín. habitaciones"
+                    value={habitacionesFiltro}
+                    onChange={(e) => setHabitacionesFiltro(e.target.value)}
+                    className="p-2 border rounded"
+                />
+                <input
+                    type="number"
+                    placeholder="Mín. baños"
+                    value={bañosFiltro}
+                    onChange={(e) => setBañosFiltro(e.target.value)}
+                    className="p-2 border rounded"
+                />
+                <input
+                    type="number"
+                    placeholder="Mín. personas"
+                    value={personasFiltro}
+                    onChange={(e) => setPersonasFiltro(e.target.value)}
+                    className="p-2 border rounded"
+                />
+            </div>
+
             <table className="w-full bg-gray-100 rounded-lg overflow-hidden shadow-md">
                 <thead>
                     <tr className="bg-lime-600 text-white text-left">
-                        <th className="py-3 px-4">Nombre</th>
-                        <th className="py-3 px-4">Descripción</th>
-                        <th className="py-3 px-4">Estado</th>
+                        <th
+                            className="py-3 px-4 cursor-pointer"
+                            onClick={() => ordenarCabañas('nombre')}
+                        >
+                            Nombre
+                        </th>
+                        <th
+                            className="py-3 px-4 cursor-pointer"
+                            onClick={() => ordenarCabañas('descripcion')}
+                        >
+                            Descripción
+                        </th>
+                        <th
+                            className="py-3 px-4 cursor-pointer"
+                            onClick={() => ordenarCabañas('estado')}
+                        >
+                            Estado
+                        </th>
+                        <th
+                            className="py-3 px-4 cursor-pointer"
+                            onClick={() => ordenarCabañas('reservasHistoricas')}
+                        >
+                            Reservas Históricas
+                        </th>
+                        <th
+                            className="py-3 px-4 cursor-pointer"
+                            onClick={() => ordenarCabañas('cantidadHabitaciones')}
+                        >
+                            Habitaciones
+                        </th>
+                        <th
+                            className="py-3 px-4 cursor-pointer"
+                            onClick={() => ordenarCabañas('cantidadBaños')}
+                        >
+                            Baños
+                        </th>
+                        <th
+                            className="py-3 px-4 cursor-pointer"
+                            onClick={() => ordenarCabañas('cantidadPersonas')}
+                        >
+                            Personas
+                        </th>
                         <th className="py-3 px-4 text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {cabañas.map((cabaña) => (
+                    {cabañasFiltradas.map((cabaña) => (
                         <tr
                             key={cabaña._id}
-                            className={`border-b hover:bg-gray-100 transition duration-200 ${cabaña.estado != 'Disponible' ? 'bg-gray-200' : 'bg-white'} `}
+                            className={`border-b hover:bg-gray-100 transition duration-200 ${cabaña.estado !== 'Disponible' ? 'bg-gray-200' : 'bg-white'} `}
                         >
                             <td className="py-3 px-4 text-gray-700">{cabaña.nombre}</td>
                             <td className="py-3 px-4 text-gray-600 truncate max-w-xs">{cabaña.descripcion}</td>
                             <td className="py-3 px-4 text-gray-700">{cabaña.estado}</td>
+                            <td className="py-3 px-4 text-gray-700">{cabaña.reservasHistoricas}</td>
+                            <td className="py-3 px-4 text-gray-700">{cabaña.cantidadHabitaciones}</td>
+                            <td className="py-3 px-4 text-gray-700">{cabaña.cantidadBaños}</td>
+                            <td className="py-3 px-4 text-gray-700">{cabaña.cantidadPersonas}</td>
                             <td className="py-3 px-4 text-center">
-                                <Link
-                                    to={`/admin/EditarCabaña/${cabaña._id}`}
-                                    className="text-lime-500 hover:text-lime-700 mr-4 transition duration-200"
-                                >
-                                    Editar
-                                </Link>
-                                <button
-                                    onClick={() => cabaña.estado != 'Disponible' ? cambiarEstado(cabaña._id, 'No Disponible') : cambiarEstado(cabaña._id, 'Disponible')}
-                                    className={`text-white py-1 px-3 rounded ${cabaña.estado === 'Disponible'
+                                <div className="flex justify-center items-center gap-4">
+                                    <Link
+                                        to={`/admin/EditarCabaña/${cabaña._id}`}
+                                        className="text-lime-500 hover:text-lime-700 transition duration-200"
+                                    >
+                                        Editar
+                                    </Link>
+                                    <button
+                                        onClick={() => cabaña.estado !== 'Disponible' ? cambiarEstado(cabaña._id, 'No Disponible') : cambiarEstado(cabaña._id, 'Disponible')}
+                                        className={`text-white py-1 px-3 rounded ${cabaña.estado === 'Disponible'
                                             ? 'bg-red-500 hover:bg-red-700'
                                             : 'bg-green-500 hover:bg-green-700'
-                                        } transition duration-200`}
-                                >
-                                    {cabaña.estado === 'Disponible' ? 'Deshabilitar' : 'Habilitar'}
-                                </button>
-                                <Link to={`/cabaña/${cabaña._id}`} className='text-blue-500 hover:text-blue-700 ml-4 transition duration-200'>Ver</Link>
+                                            } transition duration-200`}
+                                    >
+                                        {cabaña.estado === 'Disponible' ? 'Deshabilitar' : 'Habilitar'}
+                                    </button>
+                                    <Link to={`/cabaña/${cabaña._id}`} className='text-blue-500 hover:text-blue-700 transition duration-200'>
+                                        Ver
+                                    </Link>
+                                </div>
                             </td>
                         </tr>
                     ))}

@@ -16,12 +16,15 @@ export const AdminEditarActividad = () => {
         const obtenerActividad = async () => {
             const url = `${Global.url}activity/getActivity/${id}`;
             const { datos } = await Peticion(url, "GET", null, false, 'include');
-            if (datos.success) {
+
+            if (datos.status == "success") {
                 setTitulo(datos.activity.titulo);
                 setImagen(datos.activity.imagen);
                 setDescripcion(datos.activity.descripcion);
-                setFechaInicio(datos.activity.fechaInicio);
-                setFechaFinal(datos.activity.fechaFinal);
+                const fechaInicioFormateada = new Date(datos.activity.fechaInicio).toISOString().split('T')[0];
+                const fechaFinalFormateada = new Date(datos.activity.fechaFinal).toISOString().split('T')[0];
+                setFechaInicio(fechaInicioFormateada);
+                setFechaFinal(fechaFinalFormateada);
             } else {
                 alert("Actividad no encontrada");
                 navigate("/admin/actividades");
@@ -34,10 +37,9 @@ export const AdminEditarActividad = () => {
         e.preventDefault();
         const datosActividad = { titulo, imagen, descripcion, fechaInicio, fechaFinal };
         const url = `${Global.url}activity/updateActivity/${id}`;
-        const { datos } = await Peticion(url, "PUT", datosActividad);
+        const { datos } = await Peticion(url, "PUT", datosActividad, false, 'include');
 
-        if (datos.success) {
-            alert("Actividad actualizada exitosamente");
+        if (datos && datos.status == 'success') {
             navigate("/admin/actividades");
         } else {
             alert("Error al actualizar la actividad: " + datos.mensaje);

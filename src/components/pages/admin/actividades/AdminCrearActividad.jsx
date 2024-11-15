@@ -16,10 +16,9 @@ export const AdminCrearActividad = () => {
         
         const datosActividad = { titulo, imagen, descripcion, fechaInicio, fechaFinal };
         const url = `${Global.url}activity/createActivity`;
-        const { datos } = await Peticion(url, "POST", datosActividad, true, 'include');
+        const { datos } = await Peticion(url, "POST", datosActividad, false, 'include');
 
         if (datos.success) {
-            alert("Actividad creada exitosamente");
             navigate("/admin/actividades");
         } else {
             alert("Error al crear la actividad: " + datos.mensaje);

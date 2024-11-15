@@ -12,7 +12,7 @@ export const AdminActividades = () => {
             let url = `${Global.url}activity/getAllActivities`;
             const { datos } = await Peticion(url, "GET", null, false, 'include');
 
-            if (datos.success) {
+            if (datos.status == 'success') {
                 setActividades(datos.activities);
                 setCargando(false);
             }
