@@ -9,17 +9,17 @@ const Modal = ({ isOpen, onClose, title, message, onConfirm, showConfirmButton =
         <h2 className="text-xl font-bold mb-4">{title}</h2>
         <div className="mb-4" dangerouslySetInnerHTML={{ __html: message }}></div>
         <div className="text-right">
+          <button onClick={onClose} className="bg-white text-lime-600 border mr-4 border-lime-600 hover:bg-gray-200 py-2 px-4 rounded">
+            Cerrar
+          </button>
           {showConfirmButton && (
             <button
               onClick={onConfirm}
-              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mr-2"
+              className="bg-lime-500 text-white py-2 px-4 rounded hover:bg-lime-600 mr-2"
             >
               Confirmar Reserva
             </button>
           )}
-          <button onClick={onClose} className="bg-lime-500 text-white py-2 px-4 rounded hover:bg-lime-600">
-            Cerrar
-          </button>
         </div>
       </div>
     </div>

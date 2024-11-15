@@ -66,8 +66,8 @@ export const Cabaña = () => {
         setIsConfirming(true);
         setModalTitle('Confirmar Reserva');
         setModalMessage(`
-            <div style="text-align: center; padding: 20px; background: #f9fafb; border-radius: 8px; border: 2px dashed #4CAF50; max-width: 400px; margin: 0 auto;">
-                <h2 style="font-size: 24px; color: #4CAF50; font-weight: bold;">¡Estás a punto de reservar!</h2>
+            <div style="text-align: center; padding: 20px; background: #f9fafb; border-radius: 8px; border: 2px dashed #65a30d; max-width: 400px; margin: 0 auto;">
+                <h2 style="font-size: 24px; color: #65a30d; font-weight: bold;">¡Estás a punto de reservar!</h2>
                 <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
                 <strong>Detalles de la reserva:</strong>
                 </p>
@@ -100,8 +100,8 @@ export const Cabaña = () => {
                 setReservas((prevReservas) => (Array.isArray(prevReservas) ? [...prevReservas, nuevaReserva] : [nuevaReserva]));
                 setModalTitle('Reserva Confirmada');
                 setModalMessage(`
-                    <div style="text-align: center; padding: 20px; background: #f9fafb; border-radius: 8px; border: 2px dashed #4CAF50; max-width: 400px; margin: 0 auto;">
-                        <h2 style="font-size: 24px; color: #4CAF50; font-weight: bold;">¡Reserva Confirmada!</h2>
+                    <div style="text-align: center; padding: 20px; background: #f9fafb; border-radius: 8px; border: 2px dashed #65a30d; max-width: 400px; margin: 0 auto;">
+                        <h2 style="font-size: 24px; color: #65a30d; font-weight: bold;">¡Reserva Confirmada!</h2>
                         <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
                         <strong>¡Tu reserva ha sido completada con éxito!</strong>
                         </p>
@@ -110,8 +110,8 @@ export const Cabaña = () => {
                             <div><strong>Fecha de fin:</strong> ${new Date(fechaFin).toLocaleDateString('es-ES')}</div>
                             <div><strong>Precio total:</strong> ${precioTotal} €</div>
                         </div>
-                        <div style="padding: 10px 0; border-top: 2px solid #4CAF50; margin-top: 20px;">
-                            <span style="font-size: 14px; color: #4CAF50;">Gracias por tu preferencia. ¡Nos vemos pronto!</span>
+                        <div style="padding: 10px 0; border-top: 2px solid #65a30d; margin-top: 20px;">
+                            <span style="font-size: 14px; color: #65a30d;">Gracias por tu preferencia. ¡Nos vemos pronto!</span>
                         </div>
                     </div>
                 `);
@@ -140,7 +140,7 @@ export const Cabaña = () => {
                     <CabañaSwiper cabaña={cabaña} />
                     <div className="p-4">
 
-                        <h1 className="text-2xl font-semibold text-center text-lime-700 py-4">{cabaña.descripcion}</h1>
+                        <h1 className="text-2xl font-semibold text-center text-lime-700 py-4 ">{cabaña.descripcion}</h1>
                         <hr className='mt-4' />
                         {cabaña.servicios && (
                             <div className="mt-6">

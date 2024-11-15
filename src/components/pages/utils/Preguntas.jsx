@@ -12,7 +12,7 @@ export const Preguntas = () => {
                 const response = await Peticion(Global.url + "question/getAllQuestions", "GET", null, false, 'include');
 
                 if (response && response.datos) {
-                    setPreguntas(response.datos);
+                    setPreguntas(response.datos.preguntas);
                 } else {
                     throw new Error('No se encontraron preguntas en la respuesta.');
                 }
@@ -28,7 +28,7 @@ export const Preguntas = () => {
             <div>
                 <h2 className="text-3xl font-bold text-center mb-6">Preguntas Frecuentes</h2>
                 <ul>
-                    {preguntas.map((pregunta) => (
+                    {preguntas!=[] && preguntas.map((pregunta) => (
                         <li key={pregunta._id}>
                             <div className="bg-white p-6 shadow-md rounded-md">
                             <h3 className="mt-2 font-semibold text-xl">{pregunta.pregunta}</h3>
