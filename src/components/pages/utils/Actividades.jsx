@@ -31,7 +31,6 @@ export const Actividades = () => {
 
     if (loading) return <p className="text-center text-gray-500">Cargando actividades...</p>;
 
-
     return (
         <div className="flex flex-col gap-6 p-4 max-w-screen-2xl m-auto">
             <h2 className="text-3xl font-bold text-center mb-6">Que hacer en el Camping</h2> 
@@ -50,7 +49,7 @@ export const Actividades = () => {
                             </p>
                         </div>
                         {(actividad.fechaInicio || actividad.fechaFinal) && (
-                            <div className="mt-4 text-gray-500 text-xs sm:text-sm">
+                            <div className="mt-4 text-gray-500 text-xs sm:text-sm flex gap-6">
                                 <p>
                                     Fecha de inicio: {actividad.fechaInicio ? new Date(actividad.fechaInicio).toLocaleDateString() : 'No especificada'}
                                 </p>

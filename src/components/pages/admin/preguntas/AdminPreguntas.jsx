@@ -10,7 +10,7 @@ export const AdminPreguntas = () => {
     useEffect(() => {
         const obtenerPreguntas = async () => {
             const { datos } = await Peticion(Global.url + 'question/getAllQuestions', "GET", null, false, 'include');
-            console.log(datos)
+
             if (datos.status == 'success') {
                 setPreguntas(datos.preguntas); 
                 setCargando(false);

@@ -4,7 +4,7 @@ import { Global } from '../../../../helpers/Global';
 import { Peticion } from '../../../../helpers/Peticion';
 
 export const AdminEditarPregunta = () => {
-    const { id } = useParams(); // Obtén el ID de la pregunta desde la URL
+    const { id } = useParams();
     const [pregunta, setPregunta] = useState("");
     const [respuesta, setRespuesta] = useState("");
     const [estado, setEstado] = useState("Deshabilitado");
@@ -12,13 +12,13 @@ export const AdminEditarPregunta = () => {
 
     useEffect(() => {
         const obtenerPregunta = async () => {
-            const url = `${Global.url}question/getQuestion/${id}`;  // Asegúrate de que la URL sea la correcta
+            const url = `${Global.url}question/getQuestion/${id}`
             const { datos } = await Peticion(url, "GET", null, false, 'include');
             
-            if (datos.success) {
-                setPregunta(datos.question.pregunta);
-                setRespuesta(datos.question.respuesta);
-                setEstado(datos.question.estado);
+            if (datos.status) {
+                setPregunta(datos.pregunta.pregunta);
+                setRespuesta(datos.pregunta.respuesta);
+                setEstado(datos.pregunta.estado);
             } else {
                 alert("Pregunta no encontrada");
                 navigate("/admin/preguntas");
@@ -31,10 +31,8 @@ export const AdminEditarPregunta = () => {
         e.preventDefault();
         const datosPregunta = { pregunta, respuesta, estado };
         const url = `${Global.url}question/updateQuestion/${id}`;
-        const { datos } = await Peticion(url, "PUT", datosPregunta);
-
-        if (datos.success) {
-            alert("Pregunta actualizada exitosamente");
+        const { datos } = await Peticion(url, "PUT", datosPregunta, false, 'include');
+        if (datos.status == "success") {
             navigate("/admin/preguntas");
         } else {
             alert("Error al actualizar la pregunta: " + datos.mensaje);
