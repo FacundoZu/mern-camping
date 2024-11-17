@@ -2,18 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Global } from '../../../../helpers/Global';
 import { Peticion } from '../../../../helpers/Peticion';
+import { jsPDF } from 'jspdf';
 
 export const AdminCabaña = () => {
     const [cabañas, setCabañas] = useState([]);
     const [cargando, setCargando] = useState(true);
+    
 
     const [nombreFiltro, setNombreFiltro] = useState('');
     const [reservasFiltro, setReservasFiltro] = useState('');
     const [habitacionesFiltro, setHabitacionesFiltro] = useState('');
     const [bañosFiltro, setBañosFiltro] = useState('');
     const [personasFiltro, setPersonasFiltro] = useState('');
+    const [estadoFiltro, setEstadoFiltro] = useState('');
 
-    const [orden, setOrden] = useState({ columna: 'nombre', tipo: 'asc' }); 
+    const [orden, setOrden] = useState({ columna: 'nombre', tipo: 'asc' });
 
     useEffect(() => {
         const todasLasCabañas = async () => {
@@ -37,14 +40,15 @@ export const AdminCabaña = () => {
             (!reservasFiltro || cabaña.reservasHistoricas >= parseInt(reservasFiltro)) &&
             (!habitacionesFiltro || cabaña.cantidadHabitaciones >= parseInt(habitacionesFiltro)) &&
             (!bañosFiltro || cabaña.cantidadBaños >= parseInt(bañosFiltro)) &&
-            (!personasFiltro || cabaña.cantidadPersonas >= parseInt(personasFiltro))
+            (!personasFiltro || cabaña.cantidadPersonas >= parseInt(personasFiltro)) &&
+            (!estadoFiltro || cabaña.estado.toLowerCase() === estadoFiltro.toLowerCase())
         );
     });
 
     const cambiarEstado = async (id, estado) => {
         let url = Global.url + `cabin/cambiarEstado/${id}`;
 
-        const { datos } = await Peticion(url, "PUT", {estado: estado}, false, 'include');
+        const { datos } = await Peticion(url, "PUT", { estado: estado }, false, 'include');
 
         if (datos) {
             setCabañas((prevCabañas) =>
@@ -53,6 +57,38 @@ export const AdminCabaña = () => {
                 )
             );
         }
+    };
+
+    const generarPDF = () => {
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.setTextColor(0, 102, 51);
+        doc.text('Lista de Cabañas', 20, 20);
+
+        let yPosition = 30;
+
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'bold');
+        doc.text('ID', 20, yPosition);
+        doc.text('Nombre', 80, yPosition);
+        doc.text('Estado', 130, yPosition);
+        doc.text('Reservas Históricas', 165, yPosition);
+
+        yPosition += 10;
+
+        doc.setFont('helvetica', 'normal');
+        cabañasFiltradas.forEach((cabaña) => {
+            doc.text(cabaña._id, 20, yPosition);
+            doc.text(cabaña.nombre, 80, yPosition);
+            doc.text(cabaña.estado, 130, yPosition);
+            doc.text(cabaña.reservasHistoricas.toString(), 180, yPosition);
+            yPosition += 10;
+        });
+
+        const pdfDataUri = doc.output('bloburl');
+        window.open(pdfDataUri, '_blank');
     };
 
     const ordenarCabañas = (columna) => {
@@ -73,12 +109,20 @@ export const AdminCabaña = () => {
         <div className="p-6 bg-white rounded-lg shadow-lg max-w-screen-xl mx-auto mt-8">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-semibold text-gray-800">Gestión de Cabañas</h2>
-                <Link
-                    to='/admin/CrearCabaña'
-                    className="px-4 py-2 bg-lime-600 text-white rounded hover:bg-lime-700 transition duration-200"
-                >
-                    Crear Nueva Cabaña
-                </Link>
+                <div className="flex gap-4">
+                    <Link
+                        to='/admin/CrearCabaña'
+                        className="px-4 py-2 bg-lime-600 text-white rounded hover:bg-lime-700 transition duration-200"
+                    >
+                        Crear Nueva Cabaña
+                    </Link>
+                    <button
+                        onClick={generarPDF}
+                        className="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-700 transition duration-200"
+                    >
+                        Generar Reporte PDF
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
@@ -117,6 +161,15 @@ export const AdminCabaña = () => {
                     onChange={(e) => setPersonasFiltro(e.target.value)}
                     className="p-2 border rounded"
                 />
+                <select
+                    value={estadoFiltro}
+                    onChange={(e) => setEstadoFiltro(e.target.value)}
+                    className="p-2 border rounded text-gray-400"
+                >
+                    <option value="" >Filtrar por estado</option>
+                    <option value="Disponible">Disponible</option>
+                    <option value="No Disponible">No Disponible</option>
+                </select>
             </div>
 
             <table className="w-full bg-gray-100 rounded-lg overflow-hidden shadow-md">
@@ -197,7 +250,7 @@ export const AdminCabaña = () => {
                                     >
                                         {cabaña.estado === 'Disponible' ? 'Deshabilitar' : 'Habilitar'}
                                     </button>
-                                    <Link to={`/cabaña/${cabaña._id}`} className='text-blue-500 hover:text-blue-700 transition duration-200'>
+                                    <Link to={`/admin/VerCabaña/${cabaña._id}`} className='text-blue-500 hover:text-blue-700 transition duration-200'>
                                         Ver
                                     </Link>
                                 </div>
@@ -206,7 +259,7 @@ export const AdminCabaña = () => {
                     ))}
                 </tbody>
             </table>
-            {cargando && <p className="text-center text-gray-500 mt-4">Cargando cabañas...</p>}
+            {cargando && <p className="text-center mt-4">Cargando...</p>}
         </div>
     );
 };

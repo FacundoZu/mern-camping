@@ -6,15 +6,16 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 export const CabañaSwiper = ({ cabaña }) => {
+    if (!cabaña || !cabaña.imagenPrincipal) {
+        return <div>No hay imágenes disponibles para mostrar.</div>;
+    }
+
     return (
         <Swiper
             modules={[Navigation, Pagination]}
             spaceBetween={10}
             slidesPerView={1}
-            navigation={{
-                nextEl: '.swiper-button-next-custom',
-                prevEl: '.swiper-button-prev-custom',
-            }}
+            navigation
             pagination={{ clickable: true }}
             className='h-[600px] justify-center flex items-center text-center shadow-lg mb-2'
         >
@@ -27,9 +28,6 @@ export const CabañaSwiper = ({ cabaña }) => {
                     <img src={imagen} className='w-full h-[600px] object-cover' alt={`Imagen adicional ${index + 1}`} />
                 </SwiperSlide>
             ))}
-            <div className="swiper-button-prev swiper-button-prev-custom text-lime-400 hover:text-lime-500"></div>
-            <div className="swiper-button-next swiper-button-next-custom text-lime-400 hover:text-lime-500"></div>
         </Swiper>
     );
 };
-
