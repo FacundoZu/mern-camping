@@ -1,28 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Global } from '../../../../helpers/Global';
-import { Peticion } from '../../../../helpers/Peticion';
+import { Global } from "../../../../helpers/Global";
+import { Peticion } from "../../../../helpers/Peticion";
 
 export const AdminEditarActividad = () => {
     const { id } = useParams();
     const [titulo, setTitulo] = useState("");
     const [imagen, setImagen] = useState("");
+    const [imagenFile, setImagenFile] = useState(null);
     const [descripcion, setDescripcion] = useState("");
     const [fechaInicio, setFechaInicio] = useState("");
     const [fechaFinal, setFechaFinal] = useState("");
+    const [opcionImagen, setOpcionImagen] = useState("url"); // "url" o "archivo"
+    const [isDragging, setIsDragging] = useState(false);
     const navigate = useNavigate();
+    const inputImagenRef = useRef(null);
 
     useEffect(() => {
         const obtenerActividad = async () => {
             const url = `${Global.url}activity/getActivity/${id}`;
-            const { datos } = await Peticion(url, "GET", null, false, 'include');
+            const { datos } = await Peticion(url, "GET", null, false, "include");
 
-            if (datos.status == "success") {
+            if (datos.status === "success") {
                 setTitulo(datos.activity.titulo);
                 setImagen(datos.activity.imagen);
                 setDescripcion(datos.activity.descripcion);
-                const fechaInicioFormateada = new Date(datos.activity.fechaInicio).toISOString().split('T')[0];
-                const fechaFinalFormateada = new Date(datos.activity.fechaFinal).toISOString().split('T')[0];
+                const fechaInicioFormateada = new Date(datos.activity.fechaInicio).toISOString().split("T")[0];
+                const fechaFinalFormateada = new Date(datos.activity.fechaFinal).toISOString().split("T")[0];
                 setFechaInicio(fechaInicioFormateada);
                 setFechaFinal(fechaFinalFormateada);
             } else {
@@ -33,13 +37,60 @@ export const AdminEditarActividad = () => {
         obtenerActividad();
     }, [id, navigate]);
 
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith("image/")) {
+            setImagenFile(files[0]);
+        }
+    };
+
+    const handleImageClick = () => {
+        inputImagenRef.current.click();
+    };
+
+    const onFileChange = (file) => {
+        if (file && file.type.startsWith("image/")) {
+            setImagenFile(file);
+        }
+    };
+
     const actualizarActividad = async (e) => {
         e.preventDefault();
-        const datosActividad = { titulo, imagen, descripcion, fechaInicio, fechaFinal };
-        const url = `${Global.url}activity/updateActivity/${id}`;
-        const { datos } = await Peticion(url, "PUT", datosActividad, false, 'include');
+        let imagenUrl = imagen;
 
-        if (datos && datos.status == 'success') {
+        if (opcionImagen === "archivo" && imagenFile) {
+            const formData = new FormData();
+            formData.append("image", imagenFile);
+            const uploadUrl = `${Global.url}activity/uploadActivityImage`;
+            const { datos: uploadResponse } = await Peticion(uploadUrl, "POST", formData, true, "include");
+
+            if (uploadResponse.status === "success") {
+                imagenUrl = uploadResponse.imageUrl;
+            } else {
+                alert("Error al subir la imagen: " + uploadResponse.message);
+                return;
+            }
+        } else if (opcionImagen === "url" && !imagen.trim()) {
+            alert("Por favor proporciona una URL válida para la imagen.");
+            return;
+        }
+
+        const datosActividad = { titulo, imagen: imagenUrl, descripcion, fechaInicio, fechaFinal };
+        const url = `${Global.url}activity/updateActivity/${id}`;
+        const { datos } = await Peticion(url, "PUT", datosActividad, false, "include");
+
+        if (datos && datos.status === "success") {
             navigate("/admin/actividades");
         } else {
             alert("Error al actualizar la actividad: " + datos.mensaje);
@@ -60,16 +111,78 @@ export const AdminEditarActividad = () => {
                         required
                     />
                 </div>
+
                 <div className="mb-4">
-                    <label className="block text-gray-700">Imagen (URL)</label>
-                    <input
-                        type="text"
-                        value={imagen}
-                        onChange={(e) => setImagen(e.target.value)}
-                        className="w-full p-2 border rounded mt-1"
-                        required
-                    />
+                    <label className="block text-gray-700">Imagen</label>
+                    <div className="mb-2">
+                        <label className="inline-flex items-center">
+                            <input
+                                type="radio"
+                                name="opcionImagen"
+                                value="archivo"
+                                checked={opcionImagen === "archivo"}
+                                onChange={() => setOpcionImagen("archivo")}
+                                className="mr-2"
+                            />
+                            Subir archivo
+                        </label>
+                        <label className="inline-flex items-center ml-4">
+                            <input
+                                type="radio"
+                                name="opcionImagen"
+                                value="url"
+                                checked={opcionImagen === "url"}
+                                onChange={() => setOpcionImagen("url")}
+                                className="mr-2"
+                            />
+                            Usar URL
+                        </label>
+                    </div>
+
+                    {opcionImagen === "archivo" ? (
+                        <div
+                            className={`border-2 cursor-pointer border-dashed rounded-lg p-4 ${isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-100"
+                                }`}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                            onClick={handleImageClick}
+                        >
+                            <input
+                                type="file"
+                                ref={inputImagenRef}
+                                onChange={(e) => onFileChange(e.target.files[0])}
+                                accept="image/*"
+                                className="hidden"
+                            />
+                            {imagenFile ? (
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm text-gray-600">Imagen seleccionada: {imagenFile.name}</p>
+                                    <img
+                                        src={URL.createObjectURL(imagenFile)}
+                                        alt="Vista previa"
+                                        className="h-32 w-32 object-cover rounded-md ml-2"
+                                    />
+                                </div>
+                            ) : (
+                                <p className="text-center text-gray-500">Arrastra y suelta la imagen aquí o haz clic para seleccionar.</p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="mt-2">
+                            <label className="block text-gray-700">URL de la imagen</label>
+                            <input
+                                type="url"
+                                value={imagen}
+                                onChange={(e) => setImagen(e.target.value)}
+                                className="w-full p-2 border rounded mt-1"
+                                placeholder="https://example.com/imagen.jpg"
+                                required
+                            />
+                        </div>
+                    )}
                 </div>
+
                 <div className="mb-4">
                     <label className="block text-gray-700">Descripción</label>
                     <textarea

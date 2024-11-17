@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Peticion } from '../../../../helpers/Peticion';
 import { Global } from '../../../../helpers/Global';
 import Modal from '../../utils/Modal';
+import { useNavigate } from 'react-router-dom';
 
 export const AdminCrearCabaña = () => {
     const [modelos, setModelos] = useState([]);
@@ -20,20 +21,23 @@ export const AdminCrearCabaña = () => {
     const inputImagenesAdicionalesRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
 
+    const navigate = useNavigate();
+
     useEffect(() => {
         const fetchData = async () => {
             const { datos: opciones } = await Peticion(`${Global.url}cabin/opciones`, "GET", null, false, 'include');
             const { datos: serviciosData } = await Peticion(`${Global.url}service/getAllServices`, "GET", null, false, 'include');
             setModelos(opciones?.modelos || []);
             setDisponibilidades(opciones?.disponibilidades || []);
-            console.log(serviciosData?.services)
             setServicios(serviciosData?.services || []);
         };
         fetchData();
     }, []);
 
-    const handleCloseModal = () => setIsModalOpen(false);
-
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        navigate("/admin/cabañas");
+    }
     const handleChange = ({ target: { name, value } }) =>
         setFormulario(prev => ({ ...prev, [name]: value }));
 
@@ -89,7 +93,6 @@ export const AdminCrearCabaña = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Formulario enviado:", formulario);
 
         const url = Global.url + "cabin/create";
         const { datos } = await Peticion(url, "POST", formulario, false, 'include');

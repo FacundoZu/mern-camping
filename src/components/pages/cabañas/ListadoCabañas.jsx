@@ -4,6 +4,7 @@ import { Global } from '../../../helpers/Global';
 import { PiUsersThreeFill, PiToiletBold } from "react-icons/pi";
 import { MdOutlineBedroomChild } from "react-icons/md";
 import { Link } from 'react-router-dom';
+import { FaStar } from 'react-icons/fa';
 
 export const ListadoCabañas = ({ cabañas, cargando }) => {
 
@@ -58,20 +59,32 @@ export const ListadoCabañas = ({ cabañas, cargando }) => {
                                     <div className='flex gap-4 m-2'>
                                         {cabaña.servicios.length > 0 ? (
                                             cabaña.servicios.map((servicio) => (
-                                                servicio.estado == 'Habilitado' &&
-                                                <div key={servicio._id} className="relative group">
-                                                    <img
-                                                        src={servicio.imagen}
-                                                        alt={servicio.nombre}
-                                                        title={servicio.nombre}
-                                                        className="w-auto h-10 rounded-lg bg-slate-200 p-2"
-                                                    />
-                                                </div>
+                                                servicio.estado === 'Habilitado' && (
+                                                    <div key={servicio._id} className="relative group">
+                                                        <img
+                                                            src={servicio.imagen}
+                                                            alt={servicio.nombre}
+                                                            title={servicio.nombre}
+                                                            className="w-auto h-10 rounded-lg bg-slate-200 p-2"
+                                                        />
+                                                    </div>
+                                                )
                                             ))
                                         ) : (
                                             <div>No hay servicios disponibles</div>
                                         )}
+
+                                        <div className="flex items-center ml-auto mb-4">
+                                            {Array.from({ length: 5 }, (_, index) => (
+                                                <FaStar
+                                                    key={index}
+                                                    className={`cursor-pointer ${index < cabaña.promedioRating ? "text-yellow-500" : "text-gray-300"}`}
+                                                />
+                                            ))}
+                                            <h2 className='px-1'>{cabaña.promedioRating}</h2>
+                                        </div>
                                     </div>
+
                                 </div>
                             </div>
                         </Link>

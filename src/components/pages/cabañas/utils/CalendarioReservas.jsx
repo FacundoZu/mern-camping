@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay, isWithinInterval, isBefore, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import useAuth from '../../../../hooks/useAuth';
+import { Link } from 'react-router-dom';
 
-const locales = {
-  es,
-};
+const locales = { es };
 
 const localizer = dateFnsLocalizer({
   format,
@@ -24,7 +22,7 @@ const ErrorMessage = ({ message }) => (
   </div>
 );
 
-export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId, onClose }) => {
+export const CalendarioReservas = ({ reservas, onReservar, mensajeError, onClose, precioPorNoche }) => {
   const [eventos, setEventos] = useState([]);
   const [fechaInicioSeleccionada, setFechaInicioSeleccionada] = useState(null);
   const [fechaFinSeleccionada, setFechaFinSeleccionada] = useState(null);
@@ -66,12 +64,15 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
       border: '0px',
       display: 'block',
     };
-    return {
-      style,
-    };
+    return { style };
   };
 
   const handleSelectSlot = ({ start, end }) => {
+    if (!auth) {
+      setMensajeConflicto('Debes iniciar sesión para seleccionar fechas.');
+      return;
+    }
+
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
@@ -79,8 +80,8 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
       setMensajeConflicto('No puedes seleccionar fechas anteriores al día de hoy.');
       return;
     }
-    const adjustedEnd = new Date(end);
 
+    const adjustedEnd = new Date(end);
     setFechaInicioSeleccionada(start);
     setFechaFinSeleccionada(adjustedEnd);
 
@@ -97,7 +98,7 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
       : false;
 
     if (hayConflicto) {
-      setMensajeConflicto('Las fechas seleccionadas se superponen con una reserva existente o está proxima a otra.');
+      setMensajeConflicto('Las fechas seleccionadas se superponen con una reserva existente.');
     } else {
       setMensajeConflicto('');
     }
@@ -123,13 +124,22 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
         fechaInicio: fechaInicioSeleccionada.toISOString(),
         fechaFinal: fechaFinSeleccionada.toISOString(),
       });
-
       if (response.datos?.status === 'success') {
         setFechaInicioSeleccionada(null);
         setFechaFinSeleccionada(null);
       }
     }
   };
+
+  const calcularPrecioTotal = () => {
+    if (fechaInicioSeleccionada && fechaFinSeleccionada && precioPorNoche) {
+      const dias = Math.ceil((fechaFinSeleccionada - fechaInicioSeleccionada) / (1000 * 60 * 60 * 24));
+      return dias * precioPorNoche;
+    }
+    return 0;
+  };
+
+  const precioTotal = calcularPrecioTotal();
 
   return (
     <div className="container mx-auto p-6 max-w-5xl">
@@ -141,7 +151,7 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
             events={eventos}
             startAccessor="start"
             endAccessor="end"
-            selectable
+            selectable={!!auth}
             onSelectSlot={handleSelectSlot}
             views={['month']}
             defaultView="month"
@@ -168,16 +178,22 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
               <p className="font-semibold text-lime-800">
                 Fecha de inicio:
                 <span className="font-normal text-lime-600">
-                  {' '}{fechaInicioSeleccionada.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {' '}
+                  {fechaInicioSeleccionada.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </span>
                 . Todo el día.
               </p>
               <p className="font-semibold text-lime-800 mt-2">
                 Fecha de fin:
                 <span className="font-normal text-lime-600">
-                  {' '}{fechaFinSeleccionada.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {' '}
+                  {fechaFinSeleccionada.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </span>
                 . A las 10:00 AM.
+              </p>
+              <p className="font-semibold text-lime-800 mt-2">
+                Precio total:
+                <span className="font-normal text-lime-600"> ${precioTotal.toFixed(2)}</span>
               </p>
             </div>
           ) : (
@@ -187,11 +203,31 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, userId,
           {mensajeConflicto && <ErrorMessage message={mensajeConflicto} />}
           {mensajeError && <ErrorMessage message={mensajeError} />}
 
-          <button onClick={handleReservar} className="mt-4 bg-lime-500 text-white py-3 px-6 rounded-lg hover:bg-lime-600">
-            Reservar
-          </button>
+          {!auth ? (
+            <Link
+              to="/login"
+              className="bg-lime-500 hover:bg-lime-700 text-white py-3 px-6 rounded-lg mt-4 inline-block"
+            >
+              Inicia sesión para reservar
+            </Link>
+          ) : (
+            <button
+              onClick={handleReservar}
+              className={`mt-4 py-3 px-6 rounded-lg ${mensajeConflicto || mensajeError
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-lime-500 hover:bg-lime-600'
+                } text-white`}
+              disabled={mensajeConflicto || mensajeError}
+            >
+              Reservar
+            </button>
+          )}
+
           {onClose && (
-            <button onClick={onClose} className="mt-4 bg-lime-500 text-white py-3 px-6 rounded-lg hover:bg-lime-600 ml-10">
+            <button
+              onClick={onClose}
+              className="mt-4 bg-lime-500 text-white py-3 px-6 rounded-lg hover:bg-lime-600 ml-10"
+            >
               Cerrar
             </button>
           )}

@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import useAuth from '../hooks/useAuth';
 
-const PrivateRoute = ({ children, requiredRole }) => {
+const PrivateRoute = ({ children, requiredRoles }) => {
     const { auth, loading } = useAuth();
 
     if (loading) {
@@ -12,7 +12,7 @@ const PrivateRoute = ({ children, requiredRole }) => {
     if (!auth) {
         return <Navigate to="/login" />;
     }
-    if (requiredRole && auth.role !== requiredRole) {
+    if (requiredRoles && !requiredRoles.includes(auth.role)) {
         return <Navigate to="/home" />;
     }
 

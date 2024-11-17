@@ -1,4 +1,4 @@
-export const Peticion = async (url, metodo, datosGuardar = "", archivos = false, credentials = "") => {
+export const Peticion = async (url, metodo, datosGuardar = "", archivos = false, credentials = "same-origin") => {
     let cargando = true;
 
     let opciones = {
@@ -9,7 +9,7 @@ export const Peticion = async (url, metodo, datosGuardar = "", archivos = false,
     if (metodo === "GET" || metodo === "DELETE") {
         opciones = {
             method: metodo,
-            credentials,
+            credentials: credentials || "same-origin",
         };
     }
 
@@ -17,14 +17,13 @@ export const Peticion = async (url, metodo, datosGuardar = "", archivos = false,
         if (archivos) {
             opciones = {
                 method: metodo,
-                credentials,
+                credentials: credentials || "same-origin",
                 body: datosGuardar,
             };
-        }
-        else {
+        } else {
             opciones = {
                 method: metodo,
-                credentials,
+                credentials: credentials || "same-origin",
                 body: JSON.stringify(datosGuardar),
                 headers: {
                     "Content-Type": "application/json",
@@ -39,14 +38,15 @@ export const Peticion = async (url, metodo, datosGuardar = "", archivos = false,
         cargando = false;
         return {
             datos,
-            cargando
+            cargando,
+            error: null,
         };
     } catch (error) {
         cargando = false;
         return {
             datos: null,
+            cargando,
             error: error.message,
-            cargando
         };
     }
 };

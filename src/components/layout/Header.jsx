@@ -11,7 +11,7 @@ export default function Header() {
 
   const [menu, setMenu] = useState(false);
   const { auth, loading } = useAuth();
-  
+
   useEffect(() => {
     setMenu(false)
   }, [])
@@ -31,9 +31,11 @@ export default function Header() {
           </h1>
         </Link>
         <ul className='relative flex items-center gap-6'>
-          { auth && auth.role == "admin" && <Link to="/admin/dashboard" className="text-slate-600 hover:underline hidden sm:inline font-medium">
+          {auth && (auth.role === "admin" || auth.role === "gerente") && (
+            <Link to={auth.role === "admin" ? "/admin/dashboard" : '/admin/cabañas' } className="text-slate-600 hover:underline hidden sm:inline font-medium">
               <li>Dashboard</li>
-          </Link>}
+            </Link>
+          )}
           <Link to="/" className="text-slate-600 hover:underline hidden sm:inline font-medium">
             <li>Home</li>
           </Link>
@@ -64,7 +66,7 @@ export default function Header() {
               </button>
 
             </div>
-          ):(
+          ) : (
             <Link to="/login" className="text-lime-600 font-medium text-lg hidden sm:inline transition duration-200">
               Iniciar sesión
             </Link>
