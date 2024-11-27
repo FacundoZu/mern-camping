@@ -38,7 +38,7 @@ export const AdminEditarCabaña = () => {
             const url = `${Global.url}cabin/getCabin/${id}`;
             const { datos } = await Peticion(url, 'GET', null, false, 'include');
             const cabin = datos.cabin;
-            if (datos) {
+            if (cabin) {
                 setFormulario({
                     nombre: cabin.nombre,
                     modelo: cabin.modelo,
@@ -51,9 +51,9 @@ export const AdminEditarCabaña = () => {
                     servicios: cabin.servicios.map(s => s._id),
                 });
                 setImagenPrincipal(cabin.imagenPrincipal);
-                setImagenesAdicionales(cabin.imagenesAdicionales);
+                setImagenesAdicionales(cabin.imagenes);
                 setImagenPrincipalInicial(cabin.imagenPrincipal);
-                setImagenesAdicionalesIniciales(cabin.imagenesAdicionales);
+                setImagenesAdicionalesIniciales(cabin.imagenes);
             }
         };
 
@@ -82,7 +82,7 @@ export const AdminEditarCabaña = () => {
     const handleCloseModal = () => {
         setIsModalOpen(false);
         navigate('/admin/cabañas');
-      };
+    };
 
     const handleDragOver = (e) => {
         e.preventDefault();
@@ -99,6 +99,12 @@ export const AdminEditarCabaña = () => {
         const files = e.dataTransfer.files;
         if (files.length > 0) {
             onFileChange(files[0], true);
+        }
+    };
+
+    const onFileChange = (file) => {
+        if (file && file.type.startsWith("image/")) {
+            setImagenPrincipal(file);
         }
     };
 
@@ -129,8 +135,8 @@ export const AdminEditarCabaña = () => {
     const handleServicioToggle = (servicioId) => {
         setFormulario((prevFormulario) => {
             const serviciosSeleccionados = prevFormulario.servicios.includes(servicioId)
-                ? prevFormulario.servicios.filter((id) => id !== servicioId) // Eliminar si está seleccionado
-                : [...prevFormulario.servicios, servicioId]; // Agregar si no está seleccionado
+                ? prevFormulario.servicios.filter((id) => id !== servicioId)
+                : [...prevFormulario.servicios, servicioId];
             return {
                 ...prevFormulario,
                 servicios: serviciosSeleccionados,
@@ -147,20 +153,24 @@ export const AdminEditarCabaña = () => {
             setModalTitle('Actualización Exitosa');
             setModalMessage('La cabaña se ha actualizado con éxito!');
             setIsModalOpen(true);
-            
+
             if (imagenPrincipal && imagenPrincipal !== imagenPrincipalInicial) {
                 await uploadImage(id, imagenPrincipal, true);
             }
-            
+
             if (imagenesAdicionales && imagenesAdicionales.length > 0) {
-                const nuevasImagenes = imagenesAdicionales.filter(image =>
-                    imagenesAdicionalesInicial.includes(image)
-                );
+                const nombresIniciales = new Set(imagenesAdicionalesInicial.map(imagen => typeof imagen === 'string' ? imagen : imagen.name));
+
+                const nuevasImagenes = imagenesAdicionales.filter(image => {
+                    const nombre = typeof image === 'string' ? image : image.name;
+                    return !nombresIniciales.has(nombre);
+                });
 
                 for (const image of nuevasImagenes) {
                     await uploadImage(id, image, false);
                 }
             }
+
 
         } else {
             alert("Error al actualizar la cabaña");
@@ -290,9 +300,16 @@ export const AdminEditarCabaña = () => {
                         />
                         {imagenesAdicionales && imagenesAdicionales.length > 0 ? (
                             <div className="grid grid-cols-2 gap-2">
-                                {imagenesAdicionales.map((img, index) => (
+                                {imagenesAdicionales.map((imag, index) => (
                                     <div key={index} className="relative">
-                                        <img src={typeof img === 'string' ? img : URL.createObjectURL(img)} alt={`Vista previa ${index + 1}`} className="h-24 w-24 object-cover rounded-md" />
+                                        <img
+                                            src={typeof imag === 'string' ? imag : URL.createObjectURL(imag)}
+                                            alt={`Vista previa ${index + 1}`}
+                                            className="h-24 w-24 object-cover rounded-md"
+                                        />
+                                        <p className="text-sm text-gray-600 mt-1">
+                                            {typeof imag === 'string' ? imag.split('/').pop() : imag.name}
+                                        </p>
                                     </div>
                                 ))}
                             </div>
@@ -301,7 +318,6 @@ export const AdminEditarCabaña = () => {
                         )}
                     </div>
                 </div>
-
                 <button type="submit" className="botton-submit h-14">Actualizar Cabaña</button>
             </form>
             <Modal

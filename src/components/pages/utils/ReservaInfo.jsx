@@ -5,7 +5,7 @@ const ReservaInfo = ({
   onClose,
   fechaInicio,
   fechaFinal,
-  total,
+  precioTotal,
   metodoPago,
   setMetodoPago,
   tarjeta,
@@ -17,6 +17,17 @@ const ReservaInfo = ({
   onConfirm
 }) => {
   const [isFormValid, setIsFormValid] = useState(false);
+
+  const calcularPrecioPorNocheYCantidadDeDias = () => {
+    const fechaInicioObj = new Date(fechaInicio);
+    const fechaFinalObj = new Date(fechaFinal);
+    const cantidadDeDias = Math.ceil((fechaFinalObj - fechaInicioObj) / (1000 * 3600 * 24));
+    const precioPorNoche = cantidadDeDias > 0 ? precioTotal / cantidadDeDias : 0;
+
+    return { cantidadDeDias, precioPorNoche };
+  };
+
+  const { cantidadDeDias, precioPorNoche } = calcularPrecioPorNocheYCantidadDeDias();
 
   useEffect(() => {
     const validarFormulario = () => {
@@ -38,7 +49,7 @@ const ReservaInfo = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 overflow-auto">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full mx-4 relative">
         <button
           onClick={onClose}
@@ -46,7 +57,7 @@ const ReservaInfo = ({
         >
           ✕
         </button>
-        <h2 className="text-2xl font-bold text-green-600 mb-4 text-center">¡Estás a punto de reservar!</h2>
+        <h2 className="text-2xl font-bold text-lime-600 mb-4 text-center">¡Estás a punto de reservar!</h2>
         <p className="text-lg text-gray-800 mb-4 text-center">
           <strong>Detalles de la reserva:</strong>
         </p>
@@ -58,7 +69,13 @@ const ReservaInfo = ({
             <strong>Fecha de fin:</strong> {new Date(fechaFinal).toLocaleDateString('es-ES')}
           </div>
           <div>
-            <strong>Precio total:</strong> {total} €
+            <strong>Cantidad de días:</strong> {cantidadDeDias} noches
+          </div>
+          <div>
+            <strong>Precio por noche:</strong> {precioPorNoche.toFixed(2)} €
+          </div>
+          <div>
+            <strong>Precio total:</strong> {precioTotal} €
           </div>
         </div>
 

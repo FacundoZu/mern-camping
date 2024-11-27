@@ -21,22 +21,33 @@ export const Cabañas = () => {
 
     const obtenerCabañas = async () => {
         let url = Global.url + "cabin/getCabins";
-        const { datos, cargando } = await Peticion(url, "GET", null, false, "include");
-
+        const { datos } = await Peticion(url, "GET", null, false, "include");
+    
         if (datos && datos.cabins) {
             const cabañasConRatings = await Promise.all(
                 datos.cabins.map(async (cabaña) => {
-                    const reviewsUrl = `${Global.url}review/getReview/${cabaña._id}`;
-                    const { datos: reviews } = await Peticion(reviewsUrl, "GET", null, false, "include");
+                    try {
+                        const reviewsUrl = `${Global.url}reviews/getReviewsByCabin/${cabaña._id}`;
+                        const reviewsResponse = await Peticion(reviewsUrl, "GET", null, false, "include");
 
-                    const ratings = reviews?.map((review) => review.rating) || [];
-                    const promedioRating =
-                        ratings.length > 0 ? ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length : 0;
-
-                    return { ...cabaña, promedioRating: parseFloat(promedioRating.toFixed(2)) };
+                        const reviews = reviewsResponse?.datos.reviews || []; 
+                        const ratings = reviews
+                            .map((review) => Number(review.rating))
+                            .filter((rating) => !isNaN(rating));
+    
+                        const promedioRating =
+                            ratings.length > 0
+                                ? ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length
+                                : 0;
+    
+                        return { ...cabaña, promedioRating: parseFloat(promedioRating.toFixed(2)), reviews };
+                    } catch (error) {
+                        console.error(`Error al obtener reviews para la cabaña ${cabaña._id}:`, error);
+                        return { ...cabaña, promedioRating: 0 };
+                    }
                 })
             );
-
+    
             setCabañas(cabañasConRatings);
             setTodasLasCabañas(cabañasConRatings);
             setCargando(false);

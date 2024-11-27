@@ -33,7 +33,7 @@ export const Actividades = () => {
 
     return (
         <div className="flex flex-col gap-6 p-4 max-w-screen-2xl m-auto">
-            <h2 className="text-3xl font-bold text-center mb-6">Que hacer en el Camping</h2> 
+            <h2 className="text-3xl font-bold text-center mb-6">Que hacer en el Camping</h2>
             {actividades && actividades.map((actividad) => (
                 actividad.estado == 'Habilitado' &&
                 <div key={actividad._id} className="flex flex-col md:flex-row bg-white shadow-md rounded-lg overflow-hidden border border-gray-200 w-full mx-auto">
@@ -51,10 +51,10 @@ export const Actividades = () => {
                         {(actividad.fechaInicio || actividad.fechaFinal) && (
                             <div className="mt-4 text-gray-500 text-xs sm:text-sm flex gap-6">
                                 <p>
-                                    Fecha de inicio: {actividad.fechaInicio ? new Date(actividad.fechaInicio).toLocaleDateString() : 'No especificada'}
+                                    {actividad.fechaInicio && "Fecha de inicio: " + new Date(actividad.fechaInicio).toLocaleDateString()}
                                 </p>
                                 <p>
-                                    Fecha de finalización: {actividad.fechaFinal ? new Date(actividad.fechaFinal).toLocaleDateString() : 'No especificada'}
+                                    {actividad.fechaFinal && "Fecha de finalización:" + new Date(actividad.fechaFinal).toLocaleDateString()}
                                 </p>
                             </div>
                         )}

@@ -53,7 +53,7 @@ export const Cabaña = () => {
             if (datos) {
                 setReservas(datos.reservas);
             }
-            const urlComentarios = `${Global.url}reviews/getReview/${id}`;
+            const urlComentarios = `${Global.url}reviews/getReviewsByCabin/${id}`;
             const result = await Peticion(urlComentarios, "GET", null, false, null);
             if (result) {
                 setComentarios(result.datos.reviews);
@@ -70,7 +70,6 @@ export const Cabaña = () => {
         const diasDeEstancia = (new Date(fechaFinal) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24);
         return diasDeEstancia * cabaña.precio;
     };
-
 
     const handleReservar = (fechas) => {
         setFechaInicio(fechas.fechaInicio);
@@ -136,6 +135,8 @@ export const Cabaña = () => {
                         </div>
                         <div style="padding: 10px 0; border-top: 2px solid #65a30d; margin-top: 20px;">
                             <span style="font-size: 14px; color: #65a30d;">Gracias por tu preferencia. ¡Nos vemos pronto!</span>
+                            <br />
+                            <span style="font-size: 14px;"><strong>Te enviaremos un Email con más informacion</strong></span>
                         </div>
                     </div>
                 `);
@@ -232,7 +233,7 @@ export const Cabaña = () => {
             const result = await Peticion(urlReview, "POST", review, false, "include");
 
             if (result.datos.success) {
-                setComentarios((prevComentarios) => [...prevComentarios, result.datos.review]);
+                setComentarios((prevComentarios) => (prevComentarios ? [...prevComentarios, result.datos.review] : [result.datos.review]));
                 setModalTitle('Éxito');
                 setModalMessage('¡Gracias por dejar tu comentario!');
                 setIsModalOpen(true);
@@ -318,18 +319,18 @@ export const Cabaña = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className='flex gap-4 mt-4 mx-10'>
-                                    <div className="flex items-center gap-2 bg-slate-50 rounded-lg w-full p-3 md:w-1/3 border border-lime-300">
+                                <div className='flex flex-wrap gap-4 mt-4 mx-10'>
+                                    <div className="flex items-center gap-2 bg-slate-50 rounded-lg  p-3 flex-1 border border-lime-300">
                                         <PiUsersThreeFill className="text-2xl text-lime-600" />
                                         <p className="text-gray-700">{cabaña.cantidadPersonas}</p>
                                         <p className="text-gray-700">Personas</p>
                                     </div>
-                                    <div className="flex items-center gap-2 bg-slate-50 rounded-lg p-3 w-full md:w-1/3 border border-lime-300">
+                                    <div className="flex items-center gap-2 bg-slate-50 rounded-lg p-3 flex-1 border border-lime-300">
                                         <MdOutlineBedroomChild className="text-2xl text-lime-600" />
                                         <p className="text-gray-700">{cabaña.cantidadHabitaciones}</p>
                                         <p className="text-gray-700">Habitaciones</p>
                                     </div>
-                                    <div className="flex items-center gap-2 bg-slate-50 rounded-lg p-3 w-full md:w-1/3 border border-lime-300">
+                                    <div className="flex items-center gap-2 bg-slate-50 rounded-lg p-3  flex-1 border border-lime-300">
                                         <PiToiletBold className="text-2xl text-lime-600" />
                                         <p className="text-gray-700">{cabaña.cantidadBaños}</p>
                                         <p className="text-gray-700">Baños</p>
@@ -349,6 +350,8 @@ export const Cabaña = () => {
                             </button>
                             <CalendarioModal isOpen={isCalModalOpen} onClose={() => setIsCalModalOpen(false)} reservas={reservas} onReservar={handleReservar} mensajeError={mensajeError} precioPorNoche={cabaña.precio} />
                         </div>
+
+
                         <div className='mt-4'>
                             <ComentariosList
                                 reviews={comentarios}

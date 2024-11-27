@@ -24,7 +24,7 @@ const obtenerUsuarioPorId = async (usuarioId) => {
         const response = await Peticion(urlUser, "GET", '', false, 'include');
 
         if (response.datos.status === 'success') {
-            return response.datos.user.name;
+            return response.datos.user.email;
         }
         return 'Usuario desconocido';
     } catch (error) {
@@ -44,11 +44,11 @@ export const CalendarioConReservas = ({ reservas }) => {
             }
 
             const eventosFormateados = await Promise.all(reservas.map(async (reserva) => {
-                const nombreUsuario = await obtenerUsuarioPorId(reserva.usuarioId);
+                const emailUsuario = await obtenerUsuarioPorId(reserva.usuarioId);
 
                 return {
                     title: `Reservado`,
-                    usuario: nombreUsuario,
+                    usuario: emailUsuario,
                     start: new Date(reserva.fechaInicio),
                     end: new Date(reserva.fechaFinal),
                     allDay: true,

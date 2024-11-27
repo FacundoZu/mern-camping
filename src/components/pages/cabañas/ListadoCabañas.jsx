@@ -74,14 +74,20 @@ export const ListadoCabañas = ({ cabañas, cargando }) => {
                                             <div>No hay servicios disponibles</div>
                                         )}
 
-                                        <div className="flex items-center ml-auto mb-4">
-                                            {Array.from({ length: 5 }, (_, index) => (
-                                                <FaStar
-                                                    key={index}
-                                                    className={`cursor-pointer ${index < cabaña.promedioRating ? "text-yellow-500" : "text-gray-300"}`}
-                                                />
-                                            ))}
-                                            <h2 className='px-1'>{cabaña.promedioRating}</h2>
+                                        <div className="flex flex-col items-center ml-auto mb-4">
+                                            <div className="flex items-center">
+                                                {Array.from({ length: 5 }, (_, index) => (
+                                                    <FaStar
+                                                        key={index}
+                                                        className={`cursor-pointer ${index < cabaña.promedioRating ? "text-yellow-500" : "text-gray-300"}`}
+                                                    />
+                                                ))}
+                                                <h2 className="px-1">{cabaña.promedioRating}</h2>
+                                            </div>
+
+                                            <p className="text-center text-sm text-gray-500">
+                                                {cabaña.reviews && cabaña.reviews.length} opiniones
+                                            </p>
                                         </div>
                                     </div>
 

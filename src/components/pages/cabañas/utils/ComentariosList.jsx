@@ -119,10 +119,46 @@ const ComentariosList = ({ reviews = [], onAddReview, userId, onUpdateReview }) 
     return 0;
   });
 
+  const totalRatings = filteredReviews.reduce((sum, review) => sum + review.rating, 0);
+  const averageRating = filteredReviews.length > 0 ? (totalRatings / filteredReviews.length).toFixed(1) : 0;
+
+  const ratingsCount = filteredReviews.reduce((counts, review) => {
+    counts[review.rating] = (counts[review.rating] || 0) + 1;
+    return counts;
+  }, {});
+
   return (
     <div className="mt-8">
       <h2 className="text-2xl font-bold mb-4 text-lime-700 text-center">Reseñas</h2>
       <hr className="mt-4" />
+
+      <div className="text-center mt-4">
+        <h3 className="text-lg font-bold mb-4">Promedio de puntuaciones: {averageRating} / 5</h3>
+        <div className="space-y-2 max-w-md mx-auto">
+          {[5, 4, 3, 2, 1].map((star) => {
+            const count = ratingsCount[star] || 0;
+            const percentage = filteredReviews.length > 0 ? (count / filteredReviews.length) * 100 : 0;
+
+            return (
+              <div key={star} className="flex items-center text-sm">
+                <div className="flex items-center w-14">
+                  {star} <FaStar className="ml-1 text-yellow-500" />
+                </div>
+
+                <div className="flex-1 bg-gray-200 rounded-lg h-2 mx-2 relative max-w-sm">
+                  <div
+                    className="bg-yellow-500 h-2 rounded-lg"
+                    style={{ width: `${percentage}%` }}
+                  ></div>
+                </div>
+
+                <span className="w-8 text-gray-700">{count}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {!userId ? (
         <div className="text-center mt-8">
           <Link

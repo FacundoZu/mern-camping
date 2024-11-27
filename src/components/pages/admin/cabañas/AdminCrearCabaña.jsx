@@ -137,6 +137,7 @@ export const AdminCrearCabaña = () => {
                                 onChange={handleChange}
                                 className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 rows="4"
+                                required
                             />
                         ) : (
                             <input
@@ -144,6 +145,7 @@ export const AdminCrearCabaña = () => {
                                 name={field}
                                 value={formulario[field]}
                                 onChange={handleChange}
+                                required
                                 className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         )}

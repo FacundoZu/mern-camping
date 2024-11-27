@@ -36,14 +36,14 @@ const AdminVerCabaña = () => {
             setCabaña(datosCabania.cabin);
             setCargando(false);
 
-            const urlReservas = `${Global.url}reservation/getReservations/${id}`;
+            const urlReservas = `${Global.url}reservation/getAllReservationsCabin/${id}`;
             const { datos } = await Peticion(urlReservas, "GET", null, false, "include");
             if (datos.reservas) {
                 setReservas(datos.reservas);
                 calcularReservasMensuales(datos.reservas, new Date().getFullYear());
             }
 
-            const urlComentarios = `${Global.url}reviews/getReview/${id}`;
+            const urlComentarios = `${Global.url}reviews/getReviewsByCabin/${id}`;
             const data = await Peticion(
                 urlComentarios,
                 "GET",
@@ -65,7 +65,6 @@ const AdminVerCabaña = () => {
     }, [añoSeleccionado, reservas]);
 
     useEffect(() => {
-
         obtenerCabañaYReservas();
     }, [id]);
 
@@ -264,16 +263,12 @@ const AdminVerCabaña = () => {
         const pdfData = doc.output('dataurlnewwindow');
     };
 
-
-
     const cambiarEstado = async (id, estadoActual) => {
         let url = Global.url + `reviews/cambiarEstado/${id}`;
 
         const nuevoEstado = estadoActual === 'Habilitado' ? 'Deshabilitado' : 'Habilitado';
 
         const { datos } = await Peticion(url, "PUT", { estado: nuevoEstado }, false, 'include');
-
-        console.log(datos)
 
         if (datos && datos.status === 'success') {
             setComentarios((prevComentarios) =>

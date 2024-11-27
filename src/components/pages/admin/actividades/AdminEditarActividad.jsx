@@ -199,7 +199,6 @@ export const AdminEditarActividad = () => {
                         value={fechaInicio}
                         onChange={(e) => setFechaInicio(e.target.value)}
                         className="w-full p-2 border rounded mt-1"
-                        required
                     />
                 </div>
                 <div className="mb-4">
@@ -209,7 +208,6 @@ export const AdminEditarActividad = () => {
                         value={fechaFinal}
                         onChange={(e) => setFechaFinal(e.target.value)}
                         className="w-full p-2 border rounded mt-1"
-                        required
                     />
                 </div>
                 <button type="submit" className="w-full bg-lime-600 text-white p-2 rounded hover:bg-lime-700 transition duration-200">

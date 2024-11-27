@@ -48,7 +48,6 @@ export const AdminCrearActividad = () => {
 
         let imagenUrl = "";
 
-        // Validar y procesar según la opción seleccionada
         if (opcionImagen === "archivo") {
             if (!imagenFile) {
                 alert("Por favor selecciona una imagen.");
@@ -58,7 +57,6 @@ export const AdminCrearActividad = () => {
             formData.append("image", imagenFile);
             const uploadUrl = `${Global.url}activity/uploadActivityImage`;
             const { datos: uploadResponse } = await Peticion(uploadUrl, "POST", formData, true, "include");
-            console.log(uploadResponse)
 
             if (uploadResponse.status === "success") {
                 imagenUrl = uploadResponse.imageUrl;
@@ -188,7 +186,6 @@ export const AdminCrearActividad = () => {
                         value={fechaInicio}
                         onChange={(e) => setFechaInicio(e.target.value)}
                         className="w-full p-2 border rounded mt-1"
-                        required
                     />
                 </div>
 
@@ -199,7 +196,6 @@ export const AdminCrearActividad = () => {
                         value={fechaFinal}
                         onChange={(e) => setFechaFinal(e.target.value)}
                         className="w-full p-2 border rounded mt-1"
-                        required
                     />
                 </div>
 
