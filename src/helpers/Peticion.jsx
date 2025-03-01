@@ -5,12 +5,22 @@ export const Peticion = async (url, metodo, datosGuardar = "", archivos = false,
         method: metodo,
         credentials: credentials || "same-origin",
     };
-
     if (metodo === "GET" || metodo === "DELETE") {
-        opciones = {
-            method: metodo,
-            credentials: credentials || "same-origin",
-        };
+        if (archivos) {
+            opciones = {
+                method: metodo,
+                credentials: credentials || "same-origin",
+                body: JSON.stringify(datosGuardar),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            };
+        } else {
+            opciones = {
+                method: metodo,
+                credentials: credentials || "same-origin",
+            };
+        }
     }
 
     if (metodo === "POST" || metodo === "PUT") {

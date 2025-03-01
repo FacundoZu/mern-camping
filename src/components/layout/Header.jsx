@@ -3,7 +3,7 @@ import { RiLeafFill } from "react-icons/ri";
 import { FaUser } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import { MenuPerfil } from './MenuPerfil';
+import { MenuPerfil } from '../utils/usuario/MenuPerfil';
 import { CgDetailsMore } from "react-icons/cg";
 
 
@@ -21,7 +21,7 @@ export default function Header() {
   }
 
   return (
-    <header className=' bg-slate-300 shadow-md'>
+    <header className=' bg-white shadow-md'>
       <div className='flex justify-between items-center text-balance max-w-6xl mx-auto p-3'>
         <Link to="/">
           <h1 className='font-bold text-sm sm:text-xl flex items-center'>
@@ -32,7 +32,7 @@ export default function Header() {
         </Link>
         <ul className='relative flex items-center gap-6'>
           {auth && (auth.role === "admin" || auth.role === "gerente") && (
-            <Link to={auth.role === "admin" ? "/admin/dashboard" : '/admin/cabañas' } className="text-slate-600 hover:underline hidden sm:inline font-medium">
+            <Link to={auth.role === "admin" ? "/admin/dashboard" : '/admin/cabañas'} className="text-slate-600 hover:underline hidden sm:inline font-medium">
               <li>Dashboard</li>
             </Link>
           )}
@@ -52,18 +52,18 @@ export default function Header() {
 
           {auth && !loading ? (
 
-            <div className="flex items-center gap-4">
+            <div onClick={handleToggle} className="flex items-center gap-4 cursor-pointer">
 
-              <button onClick={handleToggle} className="relative text-lime-600 font-medium text-sm hidden sm:inline">
+              <p className="relative text-lime-600 font-bold text-sm hidden sm:inline">
                 {auth.name}
-              </button>
-              <button onClick={handleToggle} className='hidden sm:inline'>
+              </p>
+              <div className='hidden sm:inline'>
                 {auth.image ? (
                   <img src={auth.image} alt="Perfil" className="w-10 h-10 rounded-full border border-gray-300 shadow-sm" />
                 ) : (
                   <FaUser className="w-9 h-9 p-1 rounded-full border border-gray-300 shadow-sm text-gray-400" />
                 )}
-              </button>
+              </div>
 
             </div>
           ) : (
