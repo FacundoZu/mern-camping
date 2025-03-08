@@ -1,17 +1,104 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "../../../hooks/useForm";
+import { DateRange } from "react-date-range";
+import { format, parse } from "date-fns";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 
-export const Buscador = ({ setFiltros, cabañas }) => {
-    const { formulario, cambiado } = useForm();
+export const Buscador = ({ setFiltros, todasLasCabañas, cabañas, filtros }) => {
+    const { formulario, cambiado, setFormulario } = useForm({
+        checkIn: filtros.checkIn || "",
+        checkOut: filtros.checkOut || "",
+        cantidadPersonas: filtros.cantidadPersonas || "0",
+        cantidadHabitaciones: filtros.cantidadHabitaciones || "0",
+        cantidadBaños: filtros.cantidadBaños || "0",
+    });
+
+    const [showCalendar, setShowCalendar] = useState(false);
     const [opcionesCapacidad, setOpcionesCapacidad] = useState([]);
     const [opcionesHabitaciones, setOpcionesHabitaciones] = useState([]);
     const [opcionesBaños, setOpcionesBaños] = useState([]);
+    const calendarRef = useRef(null);
+
+    const parseDate = (dateString) => {
+        if (!dateString || typeof dateString !== "string") {
+            throw new Error("Fecha no válida");
+        }
+
+        return parse(dateString, "dd-MM-yyyy", new Date());
+    };
+
+    const [dateRange, setDateRange] = useState([
+        {
+            startDate: filtros.checkIn ? parseDate(filtros.checkIn) : new Date(),
+            endDate: filtros.checkOut ? parseDate(filtros.checkOut) : new Date(),
+            key: "selection",
+        },
+    ]);
+
+    const handleSelect = (ranges) => {
+        const { startDate, endDate } = ranges.selection;
+        setDateRange([{ startDate, endDate, key: "selection" }]);
+
+        const checkInFormatted = format(startDate, "dd-MM-yyyy");
+        const checkOutFormatted = format(endDate, "dd-MM-yyyy");
+
+        setFiltros((prev) => ({
+            ...prev,
+            checkIn: checkInFormatted,
+            checkOut: checkOutFormatted,
+        }));
+
+        setFormulario((prev) => ({
+            ...prev,
+            checkIn: checkInFormatted,
+            checkOut: checkOutFormatted,
+        }));
+    };
+
+    const actualizarOpcionesDinamicas = () => {
+        if (todasLasCabañas) {
+            let cabañasFiltradas = todasLasCabañas;
+
+            if (formulario.cantidadPersonas !== "0") {
+                cabañasFiltradas = cabañasFiltradas.filter(
+                    (c) => c.cantidadPersonas === parseInt(formulario.cantidadPersonas)
+                );
+            }
+
+            const nuevasHabitaciones = [...new Set(cabañasFiltradas.map((c) => c.cantidadHabitaciones))];
+            const nuevosBaños = [...new Set(cabañasFiltradas.map((c) => c.cantidadBaños))];
+
+            setOpcionesHabitaciones(nuevasHabitaciones.sort((a, b) => a - b));
+            setOpcionesBaños(nuevosBaños.sort((a, b) => a - b));
+        }
+    };
+
+    const manejarCambios = (e) => {
+        const { name, value } = e.target;
+        cambiado(e);
+
+        setFiltros((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
+        if (name === "cantidadPersonas" && value === "0") {
+            const habitaciones = [...new Set(todasLasCabañas.map((c) => c.cantidadHabitaciones))];
+            const baños = [...new Set(todasLasCabañas.map((c) => c.cantidadBaños))];
+
+            setOpcionesHabitaciones(habitaciones.sort((a, b) => a - b));
+            setOpcionesBaños(baños.sort((a, b) => a - b));
+        } else if (name === "cantidadPersonas") {
+            actualizarOpcionesDinamicas();
+        }
+    };
 
     useEffect(() => {
-        if (cabañas) {
-            const capacidades = [...new Set(cabañas.map(c => c.cantidadPersonas))];
-            const habitaciones = [...new Set(cabañas.map(c => c.cantidadHabitaciones))];
-            const baños = [...new Set(cabañas.map(c => c.cantidadBaños))];
+        if (cabañas && todasLasCabañas) {
+            const capacidades = [...new Set(todasLasCabañas.map((c) => c.cantidadPersonas))];
+            const habitaciones = [...new Set(cabañas.map((c) => c.cantidadHabitaciones))];
+            const baños = [...new Set(cabañas.map((c) => c.cantidadBaños))];
 
             setOpcionesCapacidad(capacidades.sort((a, b) => a - b));
             setOpcionesHabitaciones(habitaciones.sort((a, b) => a - b));
@@ -19,71 +106,127 @@ export const Buscador = ({ setFiltros, cabañas }) => {
         }
     }, [cabañas]);
 
-    const manejarCambios = (e) => {
-        cambiado(e);
-        setFiltros((prev) => ({
-            ...prev,
-            [e.target.name]: e.target.value,
-        }));
-    };
+    useEffect(() => {
+        if (formulario.cantidadPersonas !== "0") {
+            actualizarOpcionesDinamicas();
+        }
+    }, [formulario.cantidadPersonas]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+                setShowCalendar(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     return (
-        <div className='py-5 md:p-6 w-full flex justify-center items-center sticky top-0'>
-            <form className='flex flex-col bg-white p-6 md:p-8 rounded-lg shadow-lg w-full max-w-sm md:max-w-md lg:max-w-lg'>
-                <input 
-                    type="text" 
-                    name='descripcion' 
-                    className='form-input mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full' 
-                    placeholder='Buscar por descripción' 
-                    onChange={manejarCambios} 
-                />
-                
-                <h3 className='text-lg font-bold mb-2'>Filtrar por:</h3>
-                
-                <label className='font-semibold mb-1'>Capacidad</label>
-                <select 
-                    name="cantidadPersonas" 
-                    defaultValue={"0"} 
-                    onChange={manejarCambios} 
-                    className='form-select mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'
-                >
-                    <option value="0">-</option>
-                    {opcionesCapacidad.map((capacidad) => (
-                        <option key={capacidad} value={capacidad}>
-                            {capacidad} Personas
-                        </option>
-                    ))}
-                </select>
+        <div className="w-full bg-white shadow-lg p-6 rounded-md">
+            <form className="grid grid-cols-1 md:grid-cols-5 items-center gap-4 w-full justify-between">
+                <div className="flex flex-col w-full md:w-auto">
+                    <label htmlFor="check-in" className="text-sm font-medium mb-1 mx-auto">
+                        Check-in
+                    </label>
+                    <input
+                        type="text"
+                        id="check-in"
+                        value={formulario.checkIn ? formulario.checkIn : "¿Cuándo?"}
+                        readOnly
+                        onClick={() => setShowCalendar(true)}
+                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 cursor-pointer w-full"
+                    />
+                </div>
 
-                <label className='font-semibold mb-1'>Habitaciones</label>
-                <select 
-                    name="cantidadHabitaciones" 
-                    defaultValue={"0"} 
-                    onChange={manejarCambios} 
-                    className='form-select mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'
-                >
-                    <option value="0">-</option>
-                    {opcionesHabitaciones.map((habitacion) => (
-                        <option key={habitacion} value={habitacion}>
-                            {habitacion} habitación(es)
-                        </option>
-                    ))}
-                </select>
+                <div className="flex flex-col w-full md:w-auto">
+                    <label htmlFor="check-out" className="text-sm font-medium mb-1 mx-auto">
+                        Check-out
+                    </label>
+                    <input
+                        type="text"
+                        id="check-out"
+                        value={formulario.checkOut ? formulario.checkOut : "¿Cuándo?"}
+                        readOnly
+                        onClick={() => setShowCalendar(true)}
+                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 cursor-pointer w-full"
+                    />
+                </div>
 
-                <label className='font-semibold mb-1'>Baños</label>
-                <select 
-                    name="cantidadBaños" 
-                    defaultValue={"0"} 
-                    onChange={manejarCambios} 
-                    className='form-select mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'
-                >
-                    <option value="0">-</option>
-                    {opcionesBaños.map((baño) => (
-                        <option key={baño} value={baño}>
-                            {baño} baño(s)
-                        </option>
-                    ))}
-                </select>
+                {showCalendar && (
+                    <div ref={calendarRef} className="absolute mt-52 mx-auto md:mt-[28rem] md:ml-14 z-50">
+                        <DateRange
+                            editableDateInputs={true}
+                            onChange={handleSelect}
+                            showDateDisplay={false}
+                            moveRangeOnFirstSelection={false}
+                            rangeColors={["#65a30d"]}
+                            ranges={dateRange}
+                            minDate={new Date()}
+                            className="rounded-lg shadow-lg"
+                        />
+                    </div>
+                )}
+
+                <div className="flex flex-col w-full md:w-auto">
+                    <label htmlFor="cantidadPersonas" className="text-sm font-medium mb-1 mx-auto">
+                        Capacidad
+                    </label>
+                    <select
+                        name="cantidadPersonas"
+                        value={formulario.cantidadPersonas}
+                        onChange={manejarCambios}
+                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 w-full"
+                    >
+                        <option value="0">-</option>
+                        {opcionesCapacidad.map((capacidad) => (
+                            <option key={capacidad} value={capacidad}>
+                                {capacidad} Personas
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="flex flex-col w-full md:w-auto">
+                    <label htmlFor="cantidadHabitaciones" className="text-sm font-medium mb-1 mx-auto">
+                        Habitaciones
+                    </label>
+                    <select
+                        name="cantidadHabitaciones"
+                        value={formulario.cantidadHabitaciones}
+                        onChange={manejarCambios}
+                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 w-full"
+                    >
+                        <option value="0">-</option>
+                        {opcionesHabitaciones.map((habitacion) => (
+                            <option key={habitacion} value={habitacion}>
+                                {habitacion} Habitación(es)
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="flex flex-col w-full md:w-auto">
+                    <label htmlFor="cantidadBaños" className="text-sm font-medium mb-1 mx-auto">
+                        Baños
+                    </label>
+                    <select
+                        name="cantidadBaños"
+                        value={formulario.cantidadBaños}
+                        onChange={manejarCambios}
+                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 w-full"
+                    >
+                        <option value="0">-</option>
+                        {opcionesBaños.map((baño) => (
+                            <option key={baño} value={baño}>
+                                {baño} Baño(s)
+                            </option>
+                        ))}
+                    </select>
+                </div>
             </form>
         </div>
     );

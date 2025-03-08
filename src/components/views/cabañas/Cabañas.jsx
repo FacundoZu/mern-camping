@@ -1,125 +1,98 @@
 import React, { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Buscador } from "./Buscador";
 import { ListadoCabañas } from "./ListadoCabañas";
-import { FaFilter } from "react-icons/fa";
 import { Global } from "../../../helpers/Global";
 import { Peticion } from "../../../helpers/Peticion";
 
 export const Cabañas = () => {
-    const [mostrarFiltros, setMostrarFiltros] = useState(false);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
     const [cabañas, setCabañas] = useState([]);
     const [todasLasCabañas, setTodasLasCabañas] = useState([]);
     const [cargando, setCargando] = useState(true);
 
+    const obtenerFiltroDesdeUrl = (param, defaultValue = "") =>
+        searchParams.get(param) || defaultValue;
+
     const [filtros, setFiltros] = useState({
-        descripcion: "",
-        cantidadPersonas: "0",
-        cantidadHabitaciones: "0",
-        cantidadBaños: "0",
-        servicios: "",
+        checkIn: obtenerFiltroDesdeUrl("checkIn"),
+        checkOut: obtenerFiltroDesdeUrl("checkOut"),
+        cantidadPersonas: obtenerFiltroDesdeUrl("cantidadPersonas", "0"),
+        cantidadHabitaciones: obtenerFiltroDesdeUrl("cantidadHabitaciones", "0"),
+        cantidadBaños: obtenerFiltroDesdeUrl("cantidadBaños", "0"),
+        servicios: obtenerFiltroDesdeUrl("servicios"),
     });
+
+    useEffect(() => {
+        const params = new URLSearchParams();
+        Object.entries(filtros).forEach(([key, value]) => {
+            if (value) params.set(key, value);
+        });
+        navigate(`?${params.toString()}`, { replace: true });
+    }, [filtros, navigate]);
 
     const obtenerCabañas = async () => {
         let url = Global.url + "cabin/getCabins";
-        const { datos } = await Peticion(url, "GET", null, false, "include");
-    
+        const { datos } = await Peticion(url, "GET", filtros, true, "include");
+
         if (datos && datos.cabins) {
             const cabañasConRatings = await Promise.all(
                 datos.cabins.map(async (cabaña) => {
                     try {
-                        const reviewsUrl = `${Global.url}reviews/getReviewsByCabin/${cabaña._id}`;
-                        const reviewsResponse = await Peticion(reviewsUrl, "GET", null, false, "include");
+                        if (cabaña.comentarios.length > 0 && cabaña.estado == 'Disponible') {
+                            const reviewsUrl = `${Global.url}reviews/getReviewsByCabin/${cabaña._id}`;
+                            const reviewsResponse = await Peticion(reviewsUrl, "GET", "", false, "include");
 
-                        const reviews = reviewsResponse?.datos.reviews || []; 
-                        const ratings = reviews
-                            .map((review) => Number(review.rating))
-                            .filter((rating) => !isNaN(rating));
-    
-                        const promedioRating =
-                            ratings.length > 0
-                                ? ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length
-                                : 0;
-    
-                        return { ...cabaña, promedioRating: parseFloat(promedioRating.toFixed(2)), reviews };
+                            const reviews = reviewsResponse?.datos.reviews || [];
+                            const ratings = reviews
+                                .map((review) => Number(review.rating))
+                                .filter((rating) => !isNaN(rating));
+
+                            const promedioRating =
+                                ratings.length > 0
+                                    ? ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length
+                                    : 0;
+
+                            return { ...cabaña, promedioRating: parseFloat(promedioRating.toFixed(2)), reviews };
+                        } else {
+                            return { ...cabaña, promedioRating: 0 };
+                        }
                     } catch (error) {
-                        console.error(`Error al obtener reviews para la cabaña ${cabaña._id}:`, error);
                         return { ...cabaña, promedioRating: 0 };
                     }
                 })
             );
-    
-            setCabañas(cabañasConRatings);
-            setTodasLasCabañas(cabañasConRatings);
+            const cabañasFiltradas = cabañasConRatings.filter(cabaña => cabaña.estado == 'Disponible');
+            setCabañas(cabañasFiltradas);
             setCargando(false);
+        }
+    };
+
+    const obtenerTodasLasCabañas = async () => {
+        let url = Global.url + "cabin/getCabins";
+        const { datos } = await Peticion(url, "GET", null, false);
+        if (datos && datos.cabins) {
+            setTodasLasCabañas(datos.cabins);
         }
     };
 
     useEffect(() => {
         obtenerCabañas();
-    }, []);
-
-    const aplicarFiltros = () => {
-        let cabañasFiltradas = todasLasCabañas;
-
-        if (filtros.descripcion) {
-            cabañasFiltradas = cabañasFiltradas.filter((c) =>
-                c.descripcion.toLowerCase().includes(filtros.descripcion.toLowerCase())
-            );
-        }
-        if (filtros.cantidadPersonas !== "0") {
-            cabañasFiltradas = cabañasFiltradas.filter(
-                (c) => c.cantidadPersonas === parseInt(filtros.cantidadPersonas)
-            );
-        }
-        if (filtros.cantidadHabitaciones !== "0") {
-            cabañasFiltradas = cabañasFiltradas.filter(
-                (c) => c.cantidadHabitaciones === parseInt(filtros.cantidadHabitaciones)
-            );
-        }
-        if (filtros.cantidadBaños !== "0") {
-            cabañasFiltradas = cabañasFiltradas.filter((c) => c.cantidadBaños === parseInt(filtros.cantidadBaños));
-        }
-
-        setCabañas(cabañasFiltradas);
-    };
+    }, [filtros.checkIn, filtros.checkOut, filtros]);
 
     useEffect(() => {
-        aplicarFiltros();
-    }, [filtros, todasLasCabañas]);
-
-    const toggleFiltros = () => {
-        setMostrarFiltros(!mostrarFiltros);
-    };
+        obtenerTodasLasCabañas();
+    }, []);
 
     return (
-        <div
-            className={`flex flex-col lg:flex-row lg:space-x-6 mt-10 w-full px-4 ${mostrarFiltros ? "flex-col" : "flex"
-                }`}
-        >
-            <div className="lg:hidden mb-4 text-center">
-                <button
-                    className={`flex items-center justify-center space-x-2 m-auto bg-lime-600 text-white p-3 rounded-md shadow-md hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-lime-500 transition-all duration-300 w-full max-w-xs`}
-                    onClick={toggleFiltros}
-                >
-                    {mostrarFiltros ? (
-                        <p className="font-semibold w-full text-center">Ocultar Filtros</p>
-                    ) : (
-                        <div className="w-full">
-                            <p className=" flex font-semibold w-full text-center items-center justify-center gap-2">
-                                {" "}
-                                <FaFilter /> Mostrar filtros
-                            </p>
-                        </div>
-                    )}
-                </button>
+        <div className={`flex flex-col mt-10 w-full px-4`}>
+            <div className={`w-5/6 m-auto mb-6 lg:mb-0 lg:block`}>
+                <Buscador setFiltros={setFiltros} filtros={filtros} todasLasCabañas={todasLasCabañas} cabañas={cabañas} />
             </div>
 
-            <div className={`w-full lg:w-1/4 mb-6 lg:mb-0 ${mostrarFiltros ? "block" : "hidden"} lg:block`}>
-                <Buscador setFiltros={setFiltros} cabañas={todasLasCabañas} />
-            </div>
-
-            <div className="w-full lg:w-3/4 flex flex-col">
-                <ListadoCabañas cabañas={cabañas} cargando={cargando} />
+            <div className="w-5/6 m-auto min-h-screen">
+                <ListadoCabañas cabañas={cabañas} cargando={cargando} checkIn={filtros.checkIn} checkOut={filtros.checkOut} />
             </div>
         </div>
     );

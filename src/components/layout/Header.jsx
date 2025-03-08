@@ -21,13 +21,13 @@ export default function Header() {
   }
 
   return (
-    <header className=' bg-white shadow-md'>
-      <div className='flex justify-between items-center text-balance max-w-6xl mx-auto p-3'>
+    <header className=' bg-white shadow-md border-b-2 border-neutral-500'>
+      <div className='flex justify-between items-center text-balance w-5/6 mx-auto p-3'>
         <Link to="/">
           <h1 className='font-bold text-sm sm:text-xl flex items-center'>
-            <RiLeafFill className='text-lime-600 justify-center mr-1' />
-            <span className='text-slate-500'>Camping</span>
-            <span className='text-slate-700'>Cachi</span>
+            <RiLeafFill className='text-lime-600 justify-center mr-1 h-8 w-8' />
+            <span className='text-slate-500 text-sm sm:text-xl'>Camping</span>
+            <span className='text-slate-700 text-sm sm:text-xl'>Cachi</span>
           </h1>
         </Link>
         <ul className='relative flex items-center gap-6'>

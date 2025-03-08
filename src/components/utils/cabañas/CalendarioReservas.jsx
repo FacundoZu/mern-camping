@@ -1,94 +1,92 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay, isWithinInterval, isBefore } from 'date-fns';
-import { es } from 'date-fns/locale';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import useAuth from '../../../hooks/useAuth';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { DateRangePicker } from "react-date-range";
+import { es } from "date-fns/locale";
+import { addDays, isBefore, isWithinInterval, parse } from "date-fns";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import useAuth from "../../../hooks/useAuth";
+import { Link } from "react-router-dom";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 
-const locales = { es };
-
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
-  getDay,
-  locales,
-});
-
-export const CalendarioReservas = ({ reservas, onReservar, mensajeError, onClose, precioPorNoche }) => {
-  const [eventos, setEventos] = useState([]);
+export const CalendarioReservas = ({ reservas, onReservar, onClose, precioPorNoche, checkIn, checkOut }) => {
   const [fechaInicioSeleccionada, setFechaInicioSeleccionada] = useState(null);
   const [fechaFinSeleccionada, setFechaFinSeleccionada] = useState(null);
   const [hayConflicto, setHayConflicto] = useState(false);
   const { auth } = useAuth();
 
-  useEffect(() => {
-    const obtenerEventos = () => {
-      if (!reservas || reservas.length === 0) {
-        setEventos([]);
-        return;
-      }
 
-      const eventosFormateados = reservas.map((reserva) => ({
-        title: auth ? (reserva.usuarioId === auth.id ? 'Tu reserva' : 'Reservado') : 'Reservado',
-        start: new Date(reserva.fechaInicio),
-        end: new Date(reserva.fechaFinal),
-        allDay: true,
-        isUserReservation: auth ? (reserva.usuarioId === auth.id) : null,
-      }));
+  const [rangoSeleccionado, setRangoSeleccionado] = useState({
+    startDate: new Date(),
+    endDate: addDays(new Date(), 1),
+    key: "selection",
+  });
 
-      setEventos(eventosFormateados);
-    };
+  const parseDate = (dateString) => {
+    if (!dateString || typeof dateString !== "string") {
+      throw new Error("Fecha no válida");
+    }
 
-    obtenerEventos();
-  }, [reservas, auth]);
-
-  const eventStyleGetter = (event) => {
-    const backgroundColor = event.isTemporary
-      ? '#ffa500'
-      : event.isUserReservation
-        ? '#65a30d'
-        : '#475569';
-    const style = {
-      backgroundColor,
-      borderRadius: '5px',
-      opacity: 0.8,
-      color: 'white',
-      border: '0px',
-      display: 'block',
-    };
-    return { style };
+    return parse(dateString, "dd-MM-yyyy", new Date());
   };
 
-  const handleSelectSlot = ({ start, end }) => {
+
+  const fechasReservadas = Array.isArray(reservas)
+    ? reservas.flatMap((reserva) => {
+      const inicio = new Date(reserva.fechaInicio);
+      const fin = new Date(reserva.fechaFinal);
+      const fechas = [];
+      for (let fecha = inicio; fecha <= fin; fecha.setDate(fecha.getDate() + 1)) {
+        fechas.push(new Date(fecha));
+      }
+      return fechas;
+    })
+    : [];
+
+
+  useEffect(() => {
+    if (checkIn && checkOut) {
+      const fechaInicio = parseDate(checkIn);
+      const fechaFin = parseDate(checkOut);
+
+      setFechaInicioSeleccionada(fechaInicio);
+      setFechaFinSeleccionada(fechaFin);
+
+      setRangoSeleccionado({
+        startDate: fechaInicio,
+        endDate: fechaFin,
+        key: "selection",
+      });
+    }
+  }, [checkIn, checkOut]);
+
+  const handleSelect = (ranges) => {
+    const { startDate, endDate } = ranges.selection;
+
     if (!auth) {
-      toast.error('Debes iniciar sesión para seleccionar fechas.');
+      toast.error("Debes iniciar sesión para seleccionar fechas.");
       return;
     }
 
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    if (isBefore(start, hoy)) {
-      toast.error('No puedes seleccionar fechas anteriores al día de hoy.');
+    if (isBefore(startDate, hoy)) {
+      toast.error("No puedes seleccionar fechas anteriores al día de hoy.");
       return;
     }
 
-    const adjustedEnd = new Date(end);
-    setFechaInicioSeleccionada(start);
-    setFechaFinSeleccionada(adjustedEnd);
+    setFechaInicioSeleccionada(startDate);
+    setFechaFinSeleccionada(endDate);
 
     const conflicto = Array.isArray(reservas) && reservas.length > 0
       ? reservas.some((reserva) => {
         const reservaInicio = new Date(reserva.fechaInicio);
         const reservaFin = new Date(reserva.fechaFinal);
         return (
-          isWithinInterval(start, { start: reservaInicio, end: reservaFin }) ||
-          isWithinInterval(adjustedEnd, { start: reservaInicio, end: reservaFin }) ||
-          (start <= reservaInicio && adjustedEnd >= reservaFin)
+          isWithinInterval(startDate, { start: reservaInicio, end: reservaFin }) ||
+          isWithinInterval(endDate, { start: reservaInicio, end: reservaFin }) ||
+          (startDate <= reservaInicio && endDate >= reservaFin)
         );
       })
       : false;
@@ -96,22 +94,10 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, onClose
     setHayConflicto(conflicto);
 
     if (conflicto) {
-      toast.error('Las fechas seleccionadas se superponen con una reserva existente o están my proximas a otra.');
+      toast.error("Las fechas seleccionadas se superponen con una reserva existente.");
     }
 
-    const eventoTemporal = {
-      title: 'Reserva seleccionada',
-      start,
-      end: adjustedEnd,
-      allDay: true,
-      isUserReservation: true,
-      isTemporary: true,
-    };
-
-    setEventos((prevEventos) => [
-      ...prevEventos.filter((event) => event.title !== 'Reserva seleccionada'),
-      eventoTemporal,
-    ]);
+    setRangoSeleccionado(ranges.selection);
   };
 
   const handleReservar = async () => {
@@ -120,13 +106,13 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, onClose
         fechaInicio: fechaInicioSeleccionada.toISOString(),
         fechaFinal: fechaFinSeleccionada.toISOString(),
       });
-      if (response.datos?.status === 'success') {
-        toast.success('Reserva realizada con éxito.');
+      if (response.datos?.status === "success") {
+        toast.success("Reserva realizada con éxito.");
         setFechaInicioSeleccionada(null);
         setFechaFinSeleccionada(null);
         setHayConflicto(false);
       } else {
-        toast.error('Error al realizar la reserva.');
+        toast.error("Error al realizar la reserva.");
       }
     }
   };
@@ -145,51 +131,37 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, onClose
     <div className="container mx-auto p-6 max-w-5xl">
       <h2 className="text-3xl font-bold text-center mb-6">Calendario de Reservas</h2>
       <div className="p-4">
-        <div className="h-[500px] lg:h-[600px] md:h-[500px] sm:h-[400px] xs:h-[350px]">
-          <Calendar
-            localizer={localizer}
-            events={eventos}
-            startAccessor="start"
-            endAccessor="end"
-            selectable={!!auth}
-            onSelectSlot={handleSelectSlot}
-            views={['month']}
-            defaultView="month"
-            culture="es"
-            messages={{
-              next: 'Sig',
-              previous: 'Ant',
-              today: 'Hoy',
-              month: 'Mes',
-              week: 'Semana',
-              day: 'Día',
-              agenda: 'Agenda',
-              date: 'Fecha',
-              time: 'Hora',
-              event: 'Evento',
-              noEventsInRange: 'No hay eventos en este rango.',
-            }}
-            eventPropGetter={eventStyleGetter}
+        <div className="flex justify-center">
+          <DateRangePicker
+            ranges={[rangoSeleccionado]}
+            onChange={handleSelect}
+            months={2}
+            direction="horizontal"
+            locale={es}
+            minDate={new Date()}
+            rangeColors={["#65a30d"]}
+            showDateDisplay={false}
+            showMonthAndYearPickers={false}
+            className="custom-date-range-picker"
+            disabledDates={fechasReservadas}
           />
         </div>
         <div className="mt-6 text-center">
           {fechaInicioSeleccionada && fechaFinSeleccionada ? (
-            <div className="mb-4 p-6 border border-lime-300 bg-lime-50 rounded-lg shadow-md">
+            <div className="mb-4 p-6 w-3/6 m-auto border border-lime-300 bg-lime-50 rounded-lg shadow-md">
               <p className="font-semibold text-lime-800">
                 Fecha de inicio:
                 <span className="font-normal text-lime-600">
-                  {' '}
-                  {fechaInicioSeleccionada.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {" "}
+                  {fechaInicioSeleccionada.toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })}
                 </span>
-                . Todo el día.
               </p>
               <p className="font-semibold text-lime-800 mt-2">
                 Fecha de fin:
                 <span className="font-normal text-lime-600">
-                  {' '}
-                  {fechaFinSeleccionada.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {" "}
+                  {fechaFinSeleccionada.toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })}
                 </span>
-                . A las 10:00 AM.
               </p>
               <p className="font-semibold text-lime-800 mt-2">
                 Precio total:
@@ -211,8 +183,8 @@ export const CalendarioReservas = ({ reservas, onReservar, mensajeError, onClose
             <button
               onClick={handleReservar}
               className={`mt-4 py-3 px-6 rounded-lg ${!fechaInicioSeleccionada || !fechaFinSeleccionada || hayConflicto
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-lime-500 hover:bg-lime-600'
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-lime-500 hover:bg-lime-600"
                 } text-white`}
               disabled={!fechaInicioSeleccionada || !fechaFinSeleccionada || hayConflicto}
             >

@@ -17,3 +17,9 @@
 .rbc-day-bg:hover {
     background-color: #d4d4d4;
 }
+
+/* Oculta la sección de la izquierda del DateRangePicker */
+.custom-date-range-picker .rdrDefinedRangesWrapper {
+    display: none;
+}
+

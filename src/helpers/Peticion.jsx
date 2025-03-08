@@ -5,40 +5,24 @@ export const Peticion = async (url, metodo, datosGuardar = "", archivos = false,
         method: metodo,
         credentials: credentials || "same-origin",
     };
+
     if (metodo === "GET" || metodo === "DELETE") {
-        if (archivos) {
-            opciones = {
-                method: metodo,
-                credentials: credentials || "same-origin",
-                body: JSON.stringify(datosGuardar),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            };
-        } else {
-            opciones = {
-                method: metodo,
-                credentials: credentials || "same-origin",
-            };
+        if (metodo === "GET" && datosGuardar && Object.keys(datosGuardar).length > 0) {
+            const queryParams = new URLSearchParams(datosGuardar).toString();
+            url += `?${queryParams}`;
+        }
+        if (metodo === "DELETE" && archivos) {
+            opciones.body = JSON.stringify(datosGuardar),
+                opciones.headers = { "Content-Type": "application/json" }
         }
     }
 
     if (metodo === "POST" || metodo === "PUT") {
         if (archivos) {
-            opciones = {
-                method: metodo,
-                credentials: credentials || "same-origin",
-                body: datosGuardar,
-            };
+            opciones.body = datosGuardar
         } else {
-            opciones = {
-                method: metodo,
-                credentials: credentials || "same-origin",
-                body: JSON.stringify(datosGuardar),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            };
+            opciones.body = JSON.stringify(datosGuardar),
+                opciones.headers = { "Content-Type": "application/json" }
         }
     }
 

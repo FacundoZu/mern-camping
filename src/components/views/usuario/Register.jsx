@@ -33,14 +33,14 @@ export const Register = () => {
   };
 
   return (
-    <div className="mx-auto max-w-sm space-y-6 p-6 bg-white shadow-md rounded-lg mt-28">
+    <div className="mx-auto max-w-lg p-6 bg-white shadow-md rounded-lg mt-4 mb-6">
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold text-gray-800">Registro</h1>
         <p className="text-gray-500">Ingresa tu información para crear una cuenta</p>
       </div>
       <div className="">
         <form className='' onSubmit={guardarUsuario}>
-          {/* Nombre */}
+
           <div className="flex flex-col gap-3 my-2">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mt-1">Nombre</label>
             <input className="form-input"
@@ -49,7 +49,6 @@ export const Register = () => {
             {errores.name && <span className="error-msg">{errores.name}</span>}
           </div>
 
-          {/* Dirección */}
           <div className="flex flex-col gap-3 my-2">
             <label htmlFor="address" className="block text-sm font-medium text-gray-700">Dirección</label>
             <input className="form-input"
@@ -58,7 +57,6 @@ export const Register = () => {
             {errores.address && <span className="error-msg">{errores.address}</span>}
           </div>
 
-          {/* Teléfono */}
           <div className="flex flex-col gap-3 my-2">
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Teléfono</label>
             <input className="form-input"
@@ -67,7 +65,6 @@ export const Register = () => {
             {errores.phone && <span className="error-msg">{errores.phone}</span>}
           </div>
 
-          {/* Email */}
           <div className="flex flex-col gap-3 my-2">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
             <input className="form-input"
@@ -76,7 +73,6 @@ export const Register = () => {
             {errores.email && <span className="error-msg">{errores.email}</span>}
           </div>
 
-          {/* Contraseña */}
           <div className="flex flex-col gap-3 my-2">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>
             <input className="form-input"
@@ -85,7 +81,6 @@ export const Register = () => {
             {errores.password && <span className="error-msg">{errores.password}</span>}
           </div>
 
-          {/* Confirmar contraseña */}
           <div className="flex flex-col gap-3 my-2">
             <label htmlFor="password2" className="block text-sm font-medium text-gray-700">Confirmar contraseña</label>
             <input className="form-input"

@@ -14,22 +14,20 @@ export const LayoutAdmin = () => {
 
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="flex flex-1">
+    <div className="min-h-screen flex flex-col">
+      <div className="flex">
         <button
-          className="text-2xl p-4 text-white lg:hidden fixed top-4 left-4 z-50 bg-gray-800 rounded-lg"
+          className={`text-2xl p-4 text-white lg:hidden fixed top-4 left-4 z-50 bg-gray-800 rounded-lg ${isSidebarOpen ? 'translate-x-64 transition-all' : 'transition-all duration-300'}`}
           onClick={toggleSidebar}
         >
           {isSidebarOpen ? <FiX /> : <FiMenu />}
         </button>
 
-        {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 top-0 z-40 w-64 bg-gray-800 text-white p-4 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          className={`fixed inset-y-0 left-0 top-0 z-40 w-64 bg-gray-800 text-white transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
             } transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:transform-none`}
         >
-          <div className="flex flex-col h-full">
-            {/* Parte superior del sidebar */}
+          <div className="flex flex-col h-screen sticky justify-between top-0 p-4">
             <div>
               <h2 className="text-xl font-bold mb-6 flex items-center">
                 <FiSettings className="mr-2" /> Admin Dashboard
@@ -102,9 +100,7 @@ export const LayoutAdmin = () => {
               </nav>
             </div>
 
-
-
-            <div className="mt-auto">
+            <div>
               <div className='pb-4 text-center'>
                 <Link to="/" className="text-white hover:underline hidden sm:inline font-medium">
                   <p >Volver a la página</p>
@@ -137,10 +133,11 @@ export const LayoutAdmin = () => {
           />
         )}
 
-        <main className="flex-1 py-6 px-4 bg-gray-100 overflow-y-auto h-[calc(100vh-4rem)]">
+        <main className="flex-1 py-6 px-4 bg-gray-100 overflow-y-auto ">
           <Outlet />
         </main>
       </div>
+
       <ToastContainer
         pauseOnHover={false}
         pauseOnFocusLoss={false}

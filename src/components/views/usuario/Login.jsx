@@ -31,7 +31,7 @@ export const Login = () => {
   };
 
   return (
-    <div className="mx-auto max-w-sm space-y-6 p-6 bg-white shadow-md rounded-lg mt-28">
+    <div className="mx-auto max-w-md space-y-6 p-6 bg-white shadow-md rounded-lg mt-16">
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold text-gray-800">Iniciar sesión</h1>
         <p className="text-gray-500">

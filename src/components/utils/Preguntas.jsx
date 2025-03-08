@@ -29,7 +29,7 @@ export const Preguntas = () => {
 
     if (loading) {
         return (
-            <div className="py-12 bg-gray-50">
+            <div className="py-12">
                 <div className="md:w-4/6 m-auto">
                     <div className="flex justify-center items-center mb-8">
                         <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse mr-2"></div>

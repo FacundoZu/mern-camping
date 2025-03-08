@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { Peticion } from '../../../helpers/Peticion';
 import { Global } from '../../../helpers/Global';
 
@@ -17,6 +17,11 @@ import ComentariosList from './../../utils/cabañas/ComentariosList.jsx';
 
 export const Cabaña = () => {
     const { id } = useParams();
+    const [searchParams] = useSearchParams();
+
+    const checkIn = searchParams.get('checkIn');
+    const checkOut = searchParams.get('checkOut');
+
     const [cabaña, setCabaña] = useState(null);
     const [cargando, setCargando] = useState(true);
     const [reservas, setReservas] = useState([]);
@@ -25,10 +30,8 @@ export const Cabaña = () => {
     const { auth } = useAuth();
 
     const [isCalModalOpen, setIsCalModalOpen] = useState(false);
-
     const [modalTitle, setModalTitle] = useState('');
     const [modalMessage, setModalMessage] = useState('');
-
     const [metodoPago, setMetodoPago] = useState('');
     const [cbu, setCbu] = useState('');
     const [comprobante, setComprobante] = useState('');
@@ -37,34 +40,56 @@ export const Cabaña = () => {
     const [fechaInicio, setFechaInicio] = useState(null);
     const [fechaFinal, setFechaFin] = useState(null);
     const [precioTotal, setPrecioTotal] = useState(0);
-
     const [isModalOpenR, setIsModalOpenR] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    // Función para obtener los datos de la cabaña, reservas y comentarios
     const obtenerCabañaYReservas = async () => {
-        const urlCabania = `${Global.url}cabin/getCabin/${id}`;
-        const { datos: datosCabania } = await Peticion(urlCabania, "GET", null, false, 'include');
-        if (datosCabania) {
-            setCabaña(datosCabania.cabin);
+        if (!id) {
+            setMensajeError("ID de cabaña no válido.");
             setCargando(false);
+            return;
+        }
 
+        try {
+            // Obtener datos de la cabaña
+            const urlCabania = `${Global.url}cabin/getCabin/${id}`;
+            const { datos: datosCabania } = await Peticion(urlCabania, "GET", "", false, 'include');
+
+            if (!datosCabania || !datosCabania.cabin) {
+                setMensajeError("No se encontró la cabaña.");
+                setCargando(false);
+                return;
+            }
+
+            setCabaña(datosCabania.cabin);
+
+            // Obtener reservas solo si la cabaña existe
             const urlReservas = `${Global.url}reservation/getReservations/${id}`;
-            const { datos } = await Peticion(urlReservas, "GET", null, false, 'include');
-            if (datos) {
-                setReservas(datos.reservas);
+            const { datos: datosReservas } = await Peticion(urlReservas, "GET", null, false, 'include');
+
+            if (datosReservas && datosReservas.reservas) {
+                setReservas(datosReservas.reservas);
             }
+
+            // Obtener comentarios solo si la cabaña existe
             const urlComentarios = `${Global.url}reviews/getReviewsByCabin/${id}`;
-            const result = await Peticion(urlComentarios, "GET", null, false, null);
-            if (result) {
-                setComentarios(result.datos.reviews);
+            const { datos: datosComentarios } = await Peticion(urlComentarios, "GET", null, false, null);
+
+            if (datosComentarios && datosComentarios.reviews) {
+                setComentarios(datosComentarios.reviews);
             }
+        } catch (error) {
+            setMensajeError("Error al cargar los datos de la cabaña.");
+            console.error(error);
+        } finally {
+            setCargando(false);
         }
     };
 
     useEffect(() => {
         obtenerCabañaYReservas();
     }, [id]);
-
 
     const calcularPrecioTotal = (fechaInicio, fechaFinal) => {
         const diasDeEstancia = (new Date(fechaFinal) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24);
@@ -178,7 +203,6 @@ export const Cabaña = () => {
         }
     };
 
-
     const handleCancelR = () => {
         setIsModalOpenR(false);
     };
@@ -250,7 +274,6 @@ export const Cabaña = () => {
         }
     };
 
-
     const handleEditReview = async (reviewId, updatedData) => {
         if (!updatedData.rating || updatedData.comment.trim() === "") {
             return;
@@ -270,7 +293,6 @@ export const Cabaña = () => {
                             : review
                     )
                 );
-
             } else {
                 console.error("Error al actualizar la reseña:", result.mensaje);
             }
@@ -278,7 +300,6 @@ export const Cabaña = () => {
             console.error("Error en la petición de actualización:", error);
         }
     };
-
 
     return (
         <div className="container mx-auto p-6 max-w-screen-xl">
@@ -289,7 +310,6 @@ export const Cabaña = () => {
                     <CabañaSwiper cabaña={cabaña} />
 
                     <div className="p-4">
-
                         <h1 className="text-2xl font-semibold text-center text-lime-700 py-4">{cabaña.descripcion}</h1>
                         <hr className="mt-4" />
                         <h1 className="text-3xl font-bold text-lime-700 text-center my-6">
@@ -341,7 +361,7 @@ export const Cabaña = () => {
                         <hr className='pt-4 mt-8' />
 
                         <div className="min-h-screen items-center justify-center bg-gray-100 hidden sm:inline">
-                            <CalendarioReservas reservas={reservas} onReservar={handleReservar} mensajeError={mensajeError} precioPorNoche={cabaña.precio} />
+                            <CalendarioReservas reservas={reservas} onReservar={handleReservar} precioPorNoche={cabaña.precio} checkIn={checkIn} checkOut={checkOut}/>
                         </div>
                         <div className='sm:hidden mt-4'>
                             <button onClick={handleShowCalendaro} className='flex items-center m-auto bg-lime-400 hover:bg-lime-600 p-3 rounded-lg text-center'>
@@ -351,7 +371,6 @@ export const Cabaña = () => {
                             <CalendarioModal isOpen={isCalModalOpen} onClose={() => setIsCalModalOpen(false)} reservas={reservas} onReservar={handleReservar} mensajeError={mensajeError} precioPorNoche={cabaña.precio} />
                         </div>
 
-
                         <div className='mt-4'>
                             <ComentariosList
                                 reviews={comentarios}
@@ -360,7 +379,6 @@ export const Cabaña = () => {
                                 onUpdateReview={handleEditReview}
                             />
                         </div>
-
                     </div>
                 </section>
             ) : (
