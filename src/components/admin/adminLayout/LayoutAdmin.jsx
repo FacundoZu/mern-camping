@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { FiMenu, FiX, FiHome, FiUsers, FiSettings, FiActivity, FiHelpCircle, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiUsers, FiSettings, FiActivity, FiHelpCircle } from 'react-icons/fi';
 import { FaUser } from 'react-icons/fa';
 import useAuth from '../../../hooks/useAuth';
-import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 export const LayoutAdmin = () => {
@@ -138,10 +137,7 @@ export const LayoutAdmin = () => {
         </main>
       </div>
 
-      <ToastContainer
-        pauseOnHover={false}
-        pauseOnFocusLoss={false}
-      />
+
     </div>
   );
 };

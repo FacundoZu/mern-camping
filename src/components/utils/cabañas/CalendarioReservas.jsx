@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { DateRangePicker } from "react-date-range";
 import { es } from "date-fns/locale";
-import { addDays, isBefore, isWithinInterval, parse } from "date-fns";
+import { addDays, isBefore, isWithinInterval } from "date-fns";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAuth from "../../../hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
+import { formatDate, parseDate } from "../../../helpers/ParseDate";
 
-export const CalendarioReservas = ({ reservas, onReservar, onClose, precioPorNoche, checkIn, checkOut }) => {
+export const CalendarioReservas = ({ reservas, onReservar, onClose, precioPorNoche, minimoDias }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [fechaInicioSeleccionada, setFechaInicioSeleccionada] = useState(null);
   const [fechaFinSeleccionada, setFechaFinSeleccionada] = useState(null);
   const [hayConflicto, setHayConflicto] = useState(false);
-  const { auth } = useAuth();
 
 
   const [rangoSeleccionado, setRangoSeleccionado] = useState({
@@ -21,15 +22,6 @@ export const CalendarioReservas = ({ reservas, onReservar, onClose, precioPorNoc
     endDate: addDays(new Date(), 1),
     key: "selection",
   });
-
-  const parseDate = (dateString) => {
-    if (!dateString || typeof dateString !== "string") {
-      throw new Error("Fecha no válida");
-    }
-
-    return parse(dateString, "dd-MM-yyyy", new Date());
-  };
-
 
   const fechasReservadas = Array.isArray(reservas)
     ? reservas.flatMap((reserva) => {
@@ -43,6 +35,8 @@ export const CalendarioReservas = ({ reservas, onReservar, onClose, precioPorNoc
     })
     : [];
 
+  const checkIn = searchParams.get("checkIn");
+  const checkOut = searchParams.get("checkOut");
 
   useEffect(() => {
     if (checkIn && checkOut) {
@@ -62,11 +56,6 @@ export const CalendarioReservas = ({ reservas, onReservar, onClose, precioPorNoc
 
   const handleSelect = (ranges) => {
     const { startDate, endDate } = ranges.selection;
-
-    if (!auth) {
-      toast.error("Debes iniciar sesión para seleccionar fechas.");
-      return;
-    }
 
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
@@ -98,6 +87,18 @@ export const CalendarioReservas = ({ reservas, onReservar, onClose, precioPorNoc
     }
 
     setRangoSeleccionado(ranges.selection);
+
+    const diasSeleccionados = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+    if (startDate != endDate && diasSeleccionados < minimoDias) {
+      toast.error(`El mínimo de días de reserva para esta cabaña es ${minimoDias}.`);
+      return;
+    }
+
+    const nuevosParams = new URLSearchParams(searchParams);
+    nuevosParams.set("checkIn", formatDate(startDate));
+    nuevosParams.set("checkOut", formatDate(endDate));
+    setSearchParams(nuevosParams);
   };
 
   const handleReservar = async () => {
@@ -119,7 +120,7 @@ export const CalendarioReservas = ({ reservas, onReservar, onClose, precioPorNoc
 
   const calcularPrecioTotal = () => {
     if (fechaInicioSeleccionada && fechaFinSeleccionada && precioPorNoche) {
-      const dias = Math.ceil((fechaFinSeleccionada - fechaInicioSeleccionada) / (1000 * 60 * 60 * 24));
+      const dias = Math.ceil((fechaFinSeleccionada - fechaInicioSeleccionada) / (1000 * 60 * 60 * 24) + 1);
       return dias * precioPorNoche;
     }
     return 0;
@@ -130,7 +131,7 @@ export const CalendarioReservas = ({ reservas, onReservar, onClose, precioPorNoc
   return (
     <div className="container mx-auto p-6 max-w-5xl">
       <h2 className="text-3xl font-bold text-center mb-6">Calendario de Reservas</h2>
-      <div className="p-4">
+      <div className="py-4 flex w-full gap-6 justify-center items-center">
         <div className="flex justify-center">
           <DateRangePicker
             ranges={[rangoSeleccionado]}
@@ -146,11 +147,12 @@ export const CalendarioReservas = ({ reservas, onReservar, onClose, precioPorNoc
             disabledDates={fechasReservadas}
           />
         </div>
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center w-full">
           {fechaInicioSeleccionada && fechaFinSeleccionada ? (
-            <div className="mb-4 p-6 w-3/6 m-auto border border-lime-300 bg-lime-50 rounded-lg shadow-md">
+            <div className="p-6 w-full h-full flex flex-col justify-between m-auto border shadow-lg rounded-lg">
               <p className="font-semibold text-lime-800">
                 Fecha de inicio:
+                <br />
                 <span className="font-normal text-lime-600">
                   {" "}
                   {fechaInicioSeleccionada.toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })}
@@ -158,39 +160,38 @@ export const CalendarioReservas = ({ reservas, onReservar, onClose, precioPorNoc
               </p>
               <p className="font-semibold text-lime-800 mt-2">
                 Fecha de fin:
+                <br />
                 <span className="font-normal text-lime-600">
                   {" "}
                   {fechaFinSeleccionada.toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })}
                 </span>
               </p>
-              <p className="font-semibold text-lime-800 mt-2">
+              <p className="font-semibold text-lime-800 mt-2 mb-2">
+                Precio por día:
+                <span className="font-normal text-lime-600"> ${precioPorNoche}</span>
+              </p>
+              <p className="font-semibold text-lime-800 mt-2 border-t-2 p-2">
                 Precio total:
                 <span className="font-normal text-lime-600"> ${precioTotal.toFixed(2)}</span>
               </p>
+              
+                <button
+                  onClick={handleReservar}
+                  className={`mt-4 py-3 px-6 rounded-lg ${!fechaInicioSeleccionada || !fechaFinSeleccionada || hayConflicto
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-lime-500 hover:bg-lime-600"
+                    } text-white`}
+                  disabled={!fechaInicioSeleccionada || !fechaFinSeleccionada || hayConflicto}
+                >
+                  Reservar
+                </button>
+              
             </div>
           ) : (
-            <p className="text-lg text-gray-700">Selecciona un rango de fechas para hacer la reserva.</p>
+            <p className="p-6 w-full h-full m-auto border shadow-lg rounded-lg">Selecciona un rango de fechas para hacer la reserva.</p>
           )}
 
-          {!auth ? (
-            <Link
-              to="/login"
-              className="bg-lime-500 hover:bg-lime-700 text-white py-3 px-6 rounded-lg mt-4 inline-block"
-            >
-              Inicia sesión para reservar
-            </Link>
-          ) : (
-            <button
-              onClick={handleReservar}
-              className={`mt-4 py-3 px-6 rounded-lg ${!fechaInicioSeleccionada || !fechaFinSeleccionada || hayConflicto
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-lime-500 hover:bg-lime-600"
-                } text-white`}
-              disabled={!fechaInicioSeleccionada || !fechaFinSeleccionada || hayConflicto}
-            >
-              Reservar
-            </button>
-          )}
+
 
           {onClose && (
             <button

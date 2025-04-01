@@ -79,7 +79,7 @@ export const Cabañas = () => {
 
     useEffect(() => {
         obtenerCabañas();
-    }, [filtros.checkIn, filtros.checkOut, filtros]);
+    }, [filtros]);
 
     useEffect(() => {
         obtenerTodasLasCabañas();

@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Global } from "../../helpers/Global";
-import { FaFacebookSquare } from "react-icons/fa";
-import { FaSquareInstagram } from "react-icons/fa6";
+import { FaFacebookSquare, FaInstagram } from "react-icons/fa";
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -44,7 +43,7 @@ const ContactForm = () => {
       <div className="grid md:grid-cols-2 shadow-lg rounded-lg overflow-hidden">
         <div className="space-y-6 bg-lime-600 p-9 flex flex-col justify-between text-white">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Contacto</h2>
+            <h2 className="text-4xl font-bold tracking-tight">Contacto</h2>
             <p className="mt-2 text-lg text-lime-100">
               Rellena el formulario para enviarnos un mensaje y nos pondremos en contacto contigo lo antes posible.
             </p>
@@ -57,7 +56,7 @@ const ContactForm = () => {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full p-2 text-white hover:bg-lime-700 transition-colors"
+                className="rounded-full p-2 text-white hover:bg-gradient-to-b from-lime-500 to-lime-600 transition-colors"
               >
                 <FaFacebookSquare size={24} />
                 <span className="sr-only">Facebook</span>
@@ -66,9 +65,9 @@ const ContactForm = () => {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full p-2 text-white hover:bg-lime-700 transition-colors"
+                className="rounded-full p-2 text-white hover:bg-gradient-to-b from-lime-500 to-lime-600 transition-colors"
               >
-                <FaSquareInstagram size={24} />
+                <FaInstagram size={24} />
                 <span className="sr-only">Instagram</span>
               </a>
             </div>

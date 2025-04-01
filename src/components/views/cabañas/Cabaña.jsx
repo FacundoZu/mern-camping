@@ -42,8 +42,12 @@ export const Cabaña = () => {
     const [precioTotal, setPrecioTotal] = useState(0);
     const [isModalOpenR, setIsModalOpenR] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [guestInfo, setGuestInfo] = useState({
+        nombre: '',
+        email: '',
+        telefono: ''
+    });
 
-    // Función para obtener los datos de la cabaña, reservas y comentarios
     const obtenerCabañaYReservas = async () => {
         if (!id) {
             setMensajeError("ID de cabaña no válido.");
@@ -52,7 +56,6 @@ export const Cabaña = () => {
         }
 
         try {
-            // Obtener datos de la cabaña
             const urlCabania = `${Global.url}cabin/getCabin/${id}`;
             const { datos: datosCabania } = await Peticion(urlCabania, "GET", "", false, 'include');
 
@@ -64,7 +67,6 @@ export const Cabaña = () => {
 
             setCabaña(datosCabania.cabin);
 
-            // Obtener reservas solo si la cabaña existe
             const urlReservas = `${Global.url}reservation/getReservations/${id}`;
             const { datos: datosReservas } = await Peticion(urlReservas, "GET", null, false, 'include');
 
@@ -72,7 +74,6 @@ export const Cabaña = () => {
                 setReservas(datosReservas.reservas);
             }
 
-            // Obtener comentarios solo si la cabaña existe
             const urlComentarios = `${Global.url}reviews/getReviewsByCabin/${id}`;
             const { datos: datosComentarios } = await Peticion(urlComentarios, "GET", null, false, null);
 
@@ -91,8 +92,28 @@ export const Cabaña = () => {
         obtenerCabañaYReservas();
     }, [id]);
 
+    useEffect(() => {
+        let timer;
+
+        const startTime = Date.now();
+
+        const registerVisit = async () => {
+            const timeSpent = Date.now() - startTime;
+            if (timeSpent >= 5000) {
+                const url = `${Global.url}user/registerVisit`;
+                await Peticion(url, "POST", {
+                    userId: auth?.id || null,
+                    cabinId: id
+                }, false, 'include');
+            }
+        }
+        timer = setTimeout(registerVisit, 5000);
+
+        return () => clearTimeout(timer);
+    }, [id, auth])
+
     const calcularPrecioTotal = (fechaInicio, fechaFinal) => {
-        const diasDeEstancia = (new Date(fechaFinal) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24);
+        const diasDeEstancia = (new Date(fechaFinal) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24) + 1;
         return diasDeEstancia * cabaña.precio;
     };
 
@@ -107,7 +128,52 @@ export const Cabaña = () => {
         }
     };
 
+    const handleGuestInfoChange = (e) => {
+        const { name, value } = e.target;
+        setGuestInfo(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const validateGuestInfo = () => {
+
+        if (!guestInfo.nombre.trim()) {
+            setModalTitle('Error');
+            setModalMessage('Por favor ingresa tu nombre completo.');
+            setIsModalOpen(true);
+            return false;
+        }
+
+        if (!guestInfo.email.trim()) {
+            setModalTitle('Error');
+            setModalMessage('Por favor ingresa tu email.');
+            setIsModalOpen(true);
+            return false;
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestInfo.email)) {
+            setModalTitle('Error');
+            setModalMessage('Por favor ingresa un email válido.');
+            setIsModalOpen(true);
+            return false;
+        }
+
+        if (!guestInfo.telefono.trim()) {
+            setModalTitle('Error');
+            setModalMessage('Por favor ingresa tu número de teléfono.');
+            setIsModalOpen(true);
+            return false;
+        }
+
+        return true;
+    };
+
     const handleConfirmReservation = async () => {
+        if (!auth && !validateGuestInfo()) {
+            return;
+        }
+
         const payment = {
             tipo: metodoPago,
             estadoPago: 'pendiente',
@@ -116,7 +182,7 @@ export const Cabaña = () => {
         };
 
         const nuevaReserva = {
-            usuarioId: auth.id,
+            usuarioId: auth?.id || null,
             cabaniaId: cabaña._id,
             fechaInicio,
             fechaFinal,
@@ -128,13 +194,14 @@ export const Cabaña = () => {
                 cantidadHabitaciones: cabaña.cantidadHabitaciones,
                 cantidadBaños: cabaña.cantidadBaños,
             },
+            guestInfo: auth ? null : guestInfo,
             payment,
         };
 
         const url = `${Global.url}reservation/createReservation`;
-
         try {
-            const response = await Peticion(url, 'POST', nuevaReserva, false, 'include');
+            const response = await Peticion(url, 'POST', nuevaReserva, false);
+            console.log(response)
             if (response.datos?.status === 'success') {
                 setMensajeError(null);
 
@@ -150,23 +217,22 @@ export const Cabaña = () => {
                             <strong>¡Tu reserva ha sido completada con éxito!</strong>
                         </p>
                         <div style="font-size: 14px; color: #333; margin-bottom: 10px;">
+                            ${!auth ? `<div><strong>Nombre:</strong> ${guestInfo.nombre}</div>` : ''}
                             <div><strong>Fecha de inicio:</strong> ${new Date(fechaInicio).toLocaleDateString('es-ES')}</div>
                             <div><strong>Fecha de fin:</strong> ${new Date(fechaFinal).toLocaleDateString('es-ES')}</div>
                             <div><strong>Precio total:</strong> ${precioTotal} €</div>
                             <div><strong>Cabaña:</strong> ${cabaña.nombre}</div>
-                            <div><strong>Cantidad de personas:</strong> ${cabaña.cantidadPersonas}</div>
-                            <div><strong>Cantidad de habitaciones:</strong> ${cabaña.cantidadHabitaciones}</div>
-                            <div><strong>Cantidad de baños:</strong> ${cabaña.cantidadBaños}</div>
                         </div>
                         <div style="padding: 10px 0; border-top: 2px solid #65a30d; margin-top: 20px;">
                             <span style="font-size: 14px; color: #65a30d;">Gracias por tu preferencia. ¡Nos vemos pronto!</span>
                             <br />
-                            <span style="font-size: 14px;"><strong>Te enviaremos un Email con más informacion</strong></span>
+                            <span style="font-size: 14px;"><strong>Te hemos enviado un correo con los detalles</strong></span>
+                            ${!auth ? `<br /><span style="font-size: 12px; color: #666;">Guarda este número de referencia: ${response.datos.reserva._id}</span>` : ''}
                         </div>
                     </div>
                 `);
 
-                const correoUsuario = auth.email;
+                const correoUsuario = auth?.email || guestInfo.email;
                 const detallesReserva = {
                     fechaInicio,
                     fechaFinal,
@@ -178,6 +244,7 @@ export const Cabaña = () => {
                         cantidadHabitaciones: cabaña.cantidadHabitaciones,
                         cantidadBaños: cabaña.cantidadBaños,
                     },
+                    guestInfo: auth ? null : guestInfo
                 };
 
                 await fetch(`${Global.url}enviarTicket`, {
@@ -309,16 +376,14 @@ export const Cabaña = () => {
                 <section className="bg-white rounded-lg shadow-md overflow-hidden">
                     <CabañaSwiper cabaña={cabaña} />
 
-                    <div className="p-4">
+                    <div className="p-4 max-w-5xl mx-auto">
                         <h1 className="text-2xl font-semibold text-center text-lime-700 py-4">{cabaña.descripcion}</h1>
-                        <hr className="mt-4" />
-                        <h1 className="text-3xl font-bold text-lime-700 text-center my-6">
-                            ${cabaña.precio.toFixed(2)} <span className='text-black'> Por noche</span>
-                        </h1>
-                        <hr className="mt-4" />
+
+
+
 
                         {cabaña.servicios && (
-                            <div className="mt-6">
+                            <div className="mt-6 ">
                                 <div className="flex flex-wrap">
                                     {cabaña.servicios.length > 0 ? (
                                         cabaña.servicios.map((servicio) => (
@@ -358,10 +423,10 @@ export const Cabaña = () => {
                                 </div>
                             </div>
                         )}
-                        <hr className='pt-4 mt-8' />
+
 
                         <div className="min-h-screen items-center justify-center bg-gray-100 hidden sm:inline">
-                            <CalendarioReservas reservas={reservas} onReservar={handleReservar} precioPorNoche={cabaña.precio} checkIn={checkIn} checkOut={checkOut}/>
+                            <CalendarioReservas reservas={reservas} onReservar={handleReservar} precioPorNoche={cabaña.precio} minimoDias={cabaña.minimoDias} />
                         </div>
                         <div className='sm:hidden mt-4'>
                             <button onClick={handleShowCalendaro} className='flex items-center m-auto bg-lime-400 hover:bg-lime-600 p-3 rounded-lg text-center'>
@@ -390,6 +455,7 @@ export const Cabaña = () => {
                 fechaInicio={fechaInicio}
                 fechaFinal={fechaFinal}
                 precioTotal={precioTotal}
+                precioPorDia={cabaña && cabaña.precio}
                 metodoPago={metodoPago}
                 setMetodoPago={setMetodoPago}
                 cbu={cbu}
@@ -402,6 +468,9 @@ export const Cabaña = () => {
                 setCuotas={setCuotas}
                 onConfirm={handleConfirmReservation}
                 showConfirmButton={true}
+                isGuest={!auth}
+                guestInfo={guestInfo}
+                onGuestInfoChange={handleGuestInfoChange}
             />
             <Modal
                 isOpen={isModalOpen}

@@ -3,7 +3,7 @@ import { FaMapMarkerAlt, FaRoute } from 'react-icons/fa';
 
 const Mapa = () => {
     return (
-        <div className="relative w-full px-4 md:px-20 py-10 flex flex-col md:flex-row gap-8 bg-white overflow-hidden shadow-2xl hover:shadow-3xl transition-shadow duration-300">
+        <div className="relative w-full px-4 md:px-20 py-14 flex flex-col md:flex-row gap-8 bg-white overflow-hidden hover:shadow-3xl transition-shadow duration-300">
             <div className="w-full md:w-2/3 h-[300px] md:h-[400px] lg:h-[500px]">
                 <iframe
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5108.728927167168!2d-66.17071144597938!3d-25.12159360142212!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x941c1e42ddb15d41%3A0x9803b9f8f8c718e!2sCamping%20Municipal%20de%20Cachi!5e0!3m2!1ses-419!2sar!4v1731866080054!5m2!1ses-419!2sar"
@@ -16,7 +16,7 @@ const Mapa = () => {
 
             <div className="w-full md:w-1/3 flex flex-col justify-center space-y-6">
                 <div className="space-y-4">
-                    <h3 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center">
+                    <h3 className="text-xl md:text-2xl font-bold flex items-center">
                         <FaRoute className="text-lime-600 mr-2" />
                         ¿Cómo llego a Cachi?
                     </h3>
@@ -32,7 +32,7 @@ const Mapa = () => {
                 </div>
 
                 <div className="space-y-4">
-                    <h3 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center">
+                    <h3 className="text-xl md:text-2xl font-bold  flex items-center">
                         <FaMapMarkerAlt className="text-lime-600 mr-2" />
                         ¿Cómo llego al camping?
                     </h3>

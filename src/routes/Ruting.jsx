@@ -27,6 +27,7 @@ import { AdminEditarPregunta } from '../components/admin/views/preguntas/AdminEd
 import AdminVerCabaña from '../components/admin/views/cabañas/AdminVerCabaña'
 import { AdminUsuarios } from '../components/admin/views/usuarios/AdminUsuarios'
 import { AdminEditarUsuario } from '../components/admin/views/usuarios/AdminEditarUsuario'
+import { ToastContainer } from 'react-toastify'
 
 
 export const Routing = () => {
@@ -69,6 +70,11 @@ export const Routing = () => {
         </Route>
 
       </Routes>
+
+      <ToastContainer
+        pauseOnHover={false}
+        pauseOnFocusLoss={false}
+      />
 
     </BrowserRouter>
   )

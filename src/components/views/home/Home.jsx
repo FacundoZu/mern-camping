@@ -6,13 +6,14 @@ import Mapa from "../../utils/Mapa";
 import ContactForm from "../../utils/ContactForm";
 import FormularioBusqueda from "../../utils/FormularioBusqueda";
 import { IoArrowForwardCircleSharp } from "react-icons/io5";
+import VisitasRecientes from "../../utils/VisitasRecientes";
 
 export const Home = () => {
     return (
         <div className="overflow-x-hidden">
             <div className="relative h-[40rem] flex  justify-center bg-black/25 border-b-8 border-lime-700">
                 <img
-                    src="https://media.istockphoto.com/id/584589782/es/foto/tiendas-de-campa%C3%B1a-zona-de-acampada-temprano-en-la-ma%C3%B1ana-hermoso-lugar-natural.jpg?s=612x612&w=0&k=20&c=RPmP2NQWNM5GlXNXZBYmOYVh1-SdiEzWGd-RXPrCylo="
+                    src="https://images.unsplash.com/photo-1500785685164-2ed63ba5d58d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                     alt="Imagen principal"
                     className=" bottom-0 left-0 w-full h-full object-cover overflow-hidden z-[-1]"
                     style={{ position: "fixed" }}
@@ -29,11 +30,15 @@ export const Home = () => {
                 </Link>
             </div>
 
-            <section className="md:p-10 bg-gray-200 w-full">
+            <section>
+                <VisitasRecientes />
+            </section>
+
+            <section className="p-4 bg-gradient-to-b from-lime-700 to-lime-900 w-full ">
                 <Actividades />
             </section>
 
-            <section className="p-10 bg-gray-100 w-full">
+            <section className="py-14 px-20 bg-gray-100 w-full">
                 <Preguntas />
             </section>
 
@@ -41,7 +46,7 @@ export const Home = () => {
                 <Mapa />
             </section>
 
-            <section id="contact-form" className="p-10 bg-gray-200 w-full">
+            <section id="contact-form" className="p-14 bg-gray-100 w-full">
                 <ContactForm />
             </section>
         </div>

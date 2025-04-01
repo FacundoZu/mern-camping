@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "../../../hooks/useForm";
 import { DateRange } from "react-date-range";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
+import { parseDate } from "../../../helpers/ParseDate";
 
 export const Buscador = ({ setFiltros, todasLasCabañas, cabañas, filtros }) => {
     const { formulario, cambiado, setFormulario } = useForm({
@@ -19,14 +20,6 @@ export const Buscador = ({ setFiltros, todasLasCabañas, cabañas, filtros }) =>
     const [opcionesHabitaciones, setOpcionesHabitaciones] = useState([]);
     const [opcionesBaños, setOpcionesBaños] = useState([]);
     const calendarRef = useRef(null);
-
-    const parseDate = (dateString) => {
-        if (!dateString || typeof dateString !== "string") {
-            throw new Error("Fecha no válida");
-        }
-
-        return parse(dateString, "dd-MM-yyyy", new Date());
-    };
 
     const [dateRange, setDateRange] = useState([
         {
@@ -181,6 +174,7 @@ export const Buscador = ({ setFiltros, todasLasCabañas, cabañas, filtros }) =>
                         onChange={manejarCambios}
                         className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 w-full"
                     >
+                        <option value="0" className="hidden">{formulario.cantidadPersonas > 0 ? formulario.cantidadPersonas : "¿Cuántos?"}</option>
                         <option value="0">-</option>
                         {opcionesCapacidad.map((capacidad) => (
                             <option key={capacidad} value={capacidad}>

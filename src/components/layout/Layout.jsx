@@ -1,7 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
-import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 export const Layout = () => {
@@ -16,10 +15,7 @@ export const Layout = () => {
         <Outlet />
       </main>
       <Footer />
-      <ToastContainer
-        pauseOnHover={false}
-        pauseOnFocusLoss={false}
-      />
+
     </div>
   );
 };
